@@ -10,11 +10,11 @@
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
     <packaging>pom</packaging>
-    <groupId>tw.com</groupId>
-    <artifactId>ticbcs2026</artifactId>
+    <groupId>tw.org</groupId>
+    <artifactId>topbs2026</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>ticbcs2026</name>
-    <description>TICBCS 2026 年會版 </description>
+    <name>topbs2026</name>
+    <description>TOPBS 2026 年會版 </description>
     <url />
     <licenses>
         <license />
@@ -334,6 +334,6 @@
 
 
     <modules>
-        <module>ticbcs2026-admin</module>
+        <module>topbs2026-admin</module>
     </modules>
 </project>

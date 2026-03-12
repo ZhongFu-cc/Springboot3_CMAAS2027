@@ -4,7 +4,7 @@ name: Spring Boot CI/CD Deploy
 on:
   push:
     branches:
-      - main
+      - '**'
   # 也可以手動觸發 (選用)
   workflow_dispatch:
 
@@ -65,6 +65,7 @@ jobs:
           exit 1 
         fi
     - name: 上傳 JAR 到 Server
+      if: github.ref == 'refs/heads/main' # 只有在 main 分支上才執行部署
       uses: appleboy/scp-action@v0.1.7
       with:
         host: ${{ secrets.GCP_VM_HOST }}
@@ -76,6 +77,7 @@ jobs:
 
     
     - name: 部屬至 server
+      if: github.ref == 'refs/heads/main' # 只有在 main 分支上才執行部署
       uses: appleboy/ssh-action@v1
       with:
         host: ${{ secrets.GCP_VM_HOST }}

@@ -15,6 +15,9 @@ public class PaperScoreExcel {
 
 	@ExcelProperty("會員ID")
 	private String memberId;
+	
+	@ExcelProperty("會員註冊費繳費狀態")
+	private String memberPaymentStatus;
 
 	@ExcelProperty("稿件主題")
 	private String absTitle;

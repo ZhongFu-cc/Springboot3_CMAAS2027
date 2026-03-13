@@ -131,7 +131,7 @@ public class PaperDownloadManager {
 					.orElse(0.0); // 如果沒有分數，預設為 0.0
 			paperScoreExcel.setAverageScore(averageScore);
 			
-			// 8-6 拿到會員繳費狀態塞進vo
+			// 拿到會員繳費狀態塞進vo
 			Orders orders = registrationOrderMapByMemberId.get(paper.getMemberId());
 			OrderStatusEnum orderStatusEnum = OrderStatusEnum.fromValue(orders.getStatus());
 			paperScoreExcel.setMemberPaymentStatus(orderStatusEnum.getLabelZh());

@@ -279,7 +279,7 @@ public class MemberController {
 	@SaCheckRole("super-admin")
 	@Parameters({
 			@Parameter(name = "Authorization", description = "請求頭token,token-value開頭必須為Bearer ", required = true, in = ParameterIn.HEADER) })
-	@Operation(summary = "更新註冊費未付款的台灣會員，狀態改為已付款")
+	@Operation(summary = "更新註冊費未付款的會員，狀態改為已付款")
 	public R<Void> updateUnpaidMember(@RequestBody @Valid PutMemberIdDTO putMemberIdDTO) {
 		memberOrderManager.approveUnpaidMember(putMemberIdDTO.getMemberId());
 		return R.ok();

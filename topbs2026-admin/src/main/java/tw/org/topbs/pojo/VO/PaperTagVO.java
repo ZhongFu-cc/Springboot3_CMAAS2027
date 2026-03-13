@@ -83,4 +83,7 @@ public class PaperTagVO {
 	
 	@Schema(description = "持有的標籤")
 	private List<Tag> tagList;
+	
+	@Schema(description = "會員註冊費繳費狀態")
+	private String memberPaymentStatus;
 }

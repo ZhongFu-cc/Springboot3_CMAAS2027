@@ -151,8 +151,8 @@ public class NotificationServiceImpl implements NotificationService {
 		if ("zh_TW".equalsIgnoreCase(LANGUAGE)) {
 			languagePath = "/zh_tw";
 		}
-		String htmlTemplatePath = "html" + languagePath + "/registration-success-notification.html";
-		String textTemplatePath = "plain-text" + languagePath + "/registration-success-notification.txt";
+		String htmlTemplatePath = "html" + languagePath + "/retrieve-password.html";
+		String textTemplatePath = "plain-text" + languagePath + "/retrieve-password.txt";
 
 		// 4.產生具有HTML 和 純文字的兩種信件內容 EmailBodyContent  並返回
 		String htmlContent = templateEngine.process(htmlTemplatePath, context);

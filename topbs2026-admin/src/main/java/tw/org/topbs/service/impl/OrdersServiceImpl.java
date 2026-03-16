@@ -37,6 +37,23 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 	private final OrdersItemService ordersItemService;
 
 	@Override
+	public int getNotPaidRegistrationOrderGroupIndex(int groupSize) {
+		LambdaQueryWrapper<Orders> orderQueryWrapper = new LambdaQueryWrapper<>();
+		// 註冊費未繳費的 (包含繳費失敗、未繳費)
+		orderQueryWrapper.ne(Orders::getStatus, OrderStatusEnum.PAYMENT_SUCCESS.getValue()).and(wrapper -> {
+			wrapper.eq(Orders::getItemsSummary, OrderConstants.ITEMS_SUMMARY_REGISTRATION)
+					.or()
+					.eq(Orders::getItemsSummary, OrderConstants.GROUP_ITEMS_SUMMARY_REGISTRATION);
+		});
+		
+		Long notPaidCount = baseMapper.selectCount(orderQueryWrapper);
+		
+		return (int) Math.ceil(notPaidCount / (double) groupSize);
+		
+	}
+
+	
+	@Override
 	public Page<Orders> getRegistrationOrderPageByStatus(Page<Orders> page, Integer status) {
 		LambdaQueryWrapper<Orders> orderQueryWrapper = new LambdaQueryWrapper<>();
 		orderQueryWrapper.eq(status != null, Orders::getStatus, status).and(wrapper -> {
@@ -352,6 +369,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 			baseMapper.updateById(slaveOrder);
 		}
 	}
+
 
 
 

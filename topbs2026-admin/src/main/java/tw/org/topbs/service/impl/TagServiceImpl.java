@@ -241,6 +241,12 @@ public class TagServiceImpl extends ServiceImpl<TagMapper, Tag> implements TagSe
 	public Tag getOrCreateMemberGroupTag(int groupIndex) {
 		return getOrCreateGroupTag(TagTypeEnum.MEMBER.getType(), "M", groupIndex, "#2E8B57", "會員分組標籤 (第 %d 組)");
 	}
+	
+	@Override
+	public Tag getOrCreateNotPaidGroupTag(int groupIndex) {
+		return getOrCreateGroupTag(TagTypeEnum.MEMBER.getType(), "註冊費未付款", groupIndex, "#da0808", "未付款會員分組標籤 (第 %d 組)");
+	}
+
 
 	@Override
 	public Tag getOrCreateMemberCategoryGroupTag(int groupIndex, String categoryLabel) {
@@ -325,5 +331,6 @@ public class TagServiceImpl extends ServiceImpl<TagMapper, Tag> implements TagSe
 		baseMapper.insert(tag);
 		return tag;
 	}
+
 
 }

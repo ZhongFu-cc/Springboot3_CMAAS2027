@@ -14,6 +14,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import tw.org.topbs.convert.MemberConvert;
+import tw.org.topbs.enums.TagTypeEnum;
 import tw.org.topbs.helper.TagAssignmentHelper;
 import tw.org.topbs.pojo.BO.MemberExcelRaw;
 import tw.org.topbs.pojo.VO.MemberOrderVO;
@@ -25,6 +26,7 @@ import tw.org.topbs.pojo.excelPojo.MemberExcel;
 import tw.org.topbs.service.AttendeesService;
 import tw.org.topbs.service.AttendeesTagService;
 import tw.org.topbs.service.MemberService;
+import tw.org.topbs.service.MemberTagService;
 import tw.org.topbs.service.OrdersService;
 import tw.org.topbs.service.TagService;
 
@@ -35,10 +37,11 @@ import tw.org.topbs.service.TagService;
 @Component
 @RequiredArgsConstructor
 public class MemberOrderManager {
-	
+
 	private final TagAssignmentHelper tagAssignmentHelper;
 	private final MemberConvert memberConvert;
 	private final MemberService memberService;
+	private final MemberTagService memberTagService;
 	private final OrdersService ordersService;
 	private final AttendeesService attendeesService;
 	private final AttendeesTagService attendeesTagService;
@@ -93,7 +96,7 @@ public class MemberOrderManager {
 		List<Orders> unpaidRegistrationOrderList = ordersService.getUnpaidRegistrationOrderList();
 
 		// 2.獲取未付款的分頁對象
-		 IPage<MemberTagVO> unpaidMemberPage = memberService.getUnpaidMemberPage(page, unpaidRegistrationOrderList,
+		IPage<MemberTagVO> unpaidMemberPage = memberService.getUnpaidMemberPage(page, unpaidRegistrationOrderList,
 				queryText);
 		return unpaidMemberPage;
 	}
@@ -116,13 +119,15 @@ public class MemberOrderManager {
 		Attendees attendees = attendeesService.addAttendees(member);
 
 		// 4.獲取當下與會者群體的Index,進行與會者標籤分組
-		tagAssignmentHelper.assignTag(attendees.getAttendeesId(),
-				attendeesService::getAttendeesGroupIndex,
-				tagService::getOrCreateAttendeesGroupTag,
-				attendeesTagService::addAttendeesTag);
-		
+		tagAssignmentHelper.assignTag(attendees.getAttendeesId(), attendeesService::getAttendeesGroupIndex,
+				tagService::getOrCreateAttendeesGroupTag, attendeesTagService::addAttendeesTag);
+
+		// 5.移除會員 註冊費未付款 Tag
+		tagAssignmentHelper.removeGroupTagsByPattern(member.getMemberId(), TagTypeEnum.MEMBER.getType(), "註冊費未付款",
+				tagService::getTagIdsByTypeAndNamePattern, memberTagService::removeTagsFromMember);
+
 	}
-	
+
 	/**
 	 * 下載所有會員列表, 其中包含他們當前的付款狀態
 	 * 
@@ -136,13 +141,13 @@ public class MemberOrderManager {
 		// 这里URLEncoder.encode可以防止中文乱码 ， 和easyexcel没有关系
 		String fileName = URLEncoder.encode("會員名單", "UTF-8").replaceAll("\\+", "%20");
 		response.setHeader("Content-disposition", "attachment;filename*=" + fileName + ".xlsx");
-		
+
 		// 2.獲取 會員ID-註冊費訂單 的映射對象
 		Map<Long, Orders> ordersMap = ordersService.getRegistrationOrderMapByMemberId();
-		
+
 		// 3.高效率獲取所有會員資料
 		List<Member> memberList = memberService.getMembersEfficiently();
-		
+
 		// 4.遍歷會員資料,組裝excelVO對象
 		List<MemberExcel> excelData = memberList.stream().map(member -> {
 			// 4-1 獲取該會員的訂單
@@ -161,7 +166,6 @@ public class MemberOrderManager {
 		// 5.輸出成Excel
 		EasyExcel.write(response.getOutputStream(), MemberExcel.class).sheet("會員列表").doWrite(excelData);
 
-		
 	}
 
 }

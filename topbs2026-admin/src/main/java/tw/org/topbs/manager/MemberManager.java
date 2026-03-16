@@ -69,7 +69,7 @@ public class MemberManager {
 	private final String INVOICE_SUBREPORT_TEMPLATE_PATH = "jasperTemplate/orderItems.jasper";
 	private final String INVOICE_TEMPLATE_BG_PATH = "jasperTemplate/conference_invoice.jpg";
 
-	private RegistrationFeeConfig registrationFeeConfig;
+	private final RegistrationFeeConfig registrationFeeConfig;
 	private final MemberService memberService;
 	private final OrdersService ordersService;
 	private final AttendeesService attendeesService;

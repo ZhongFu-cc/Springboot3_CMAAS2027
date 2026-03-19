@@ -211,7 +211,7 @@ public class PaperFileUploadServiceImpl extends ServiceImpl<PaperFileUploadMappe
 			String fileName = paper.getAbsType() + "_" + paper.getFirstAuthor() + fileExtension;
 
 			// 判斷是PDF檔 還是 DOCX檔 會變更path
-			if (fileExtension.equals("pdf")) {
+			if (fileExtension.equals(".pdf")) {
 				path += "/pdf/";
 				paperFileUpload.setType(PaperFileTypeEnum.ABSTRACTS_PDF.getValue());
 
@@ -230,7 +230,7 @@ public class PaperFileUploadServiceImpl extends ServiceImpl<PaperFileUploadMappe
 					log.error(e.toString());
 				}
 
-			} else if (fileExtension.equals("doc") || fileExtension.equals("docx")) {
+			} else if (fileExtension.equals(".doc") || fileExtension.equals(".docx")) {
 				path += "/docx/";
 				paperFileUpload.setType(PaperFileTypeEnum.ABSTRACTS_DOCX.getValue());
 			}
@@ -238,6 +238,9 @@ public class PaperFileUploadServiceImpl extends ServiceImpl<PaperFileUploadMappe
 			// 上傳檔案至S3,
 			String dbUrl = s3Util.upload(path, fileName, file);
 
+			// 設定檔名
+			paperFileUpload.setFileName(fileName);
+			
 			// 設定檔案路徑
 			paperFileUpload.setPath(dbUrl);
 

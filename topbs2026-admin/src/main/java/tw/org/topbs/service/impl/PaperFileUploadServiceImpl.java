@@ -422,7 +422,7 @@ public class PaperFileUploadServiceImpl extends ServiceImpl<PaperFileUploadMappe
 					PaperFileUpload paperFileUpload = new PaperFileUpload();
 					paperFileUpload.setPaperId(paper.getPaperId());
 					paperFileUpload.setType(PaperFileTypeEnum.SUPPLEMENTARY_MATERIAL.getValue());
-					paperFileUpload.setPath("/" + bucketName + "/" + filePath);
+					paperFileUpload.setPath(filePath);
 					paperFileUpload.setFileName(fileName);
 					baseMapper.insert(paperFileUpload);
 

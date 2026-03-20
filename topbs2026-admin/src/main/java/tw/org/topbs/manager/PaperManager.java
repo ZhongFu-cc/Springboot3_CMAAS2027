@@ -257,7 +257,7 @@ public class PaperManager {
 			// 3-1資料轉換
 			PaperVO paperVO = paperConvert.entityToVO(paper);
 			// 3-2塞入附件
-			paperVO.setPaperFileUpload(filesMapByPaperId.getOrDefault(filesMapByPaperId, Collections.emptyList()));
+			paperVO.setPaperFileUpload(filesMapByPaperId.getOrDefault(paperVO.getPaperId(), Collections.emptyList()));
 
 			return paperVO;
 		}).toList();

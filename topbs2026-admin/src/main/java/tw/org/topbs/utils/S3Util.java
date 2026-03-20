@@ -716,8 +716,10 @@ public class S3Util {
 
 			CompleteMultipartUploadResponse response = s3Client.completeMultipartUpload(completeRequest);
 
+			String formatDbUrl = this.formatDbUrl(bucket,s3Key);
+			
 			log.info("S3 分片合併完成: s3Key={}, location={}", s3Key, response.location());
-			return response.location();
+			return formatDbUrl;
 
 		} catch (S3Exception e) {
 			log.error("完成 Multipart Upload 失敗: uploadId={}, s3Key={}", uploadId, s3Key, e);

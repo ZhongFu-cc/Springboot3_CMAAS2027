@@ -2,6 +2,7 @@ package tw.org.topbs.mapper;
 
 import java.util.List;
 
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
@@ -21,4 +22,6 @@ public interface PaperMapper extends BaseMapper<Paper> {
 	@Select("SELECT * FROM paper WHERE is_deleted = 0")
 	List<Paper> selectPapers();
 	
+	@Select("SELECT * FROM paper WHERE status = #{status} AND is_deleted = 0")
+	List<Paper> selectPapersByStatus(@Param("status") Integer status);
 }

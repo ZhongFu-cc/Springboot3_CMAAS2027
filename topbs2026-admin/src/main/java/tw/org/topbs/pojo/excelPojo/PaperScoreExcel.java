@@ -71,7 +71,7 @@ public class PaperScoreExcel {
 	@ExcelProperty("全部作者單位")
 	private String allAuthorAffiliation;
 
-	@ExcelProperty("稿件狀態")
+	@ExcelProperty("稿件狀態(一階段可選:未審核、入選、未入選;二階段可選:獲獎、未獲獎)")
 	private String status;
 
 	@ExcelProperty("發表編號")

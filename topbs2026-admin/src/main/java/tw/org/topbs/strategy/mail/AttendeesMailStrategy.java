@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import org.redisson.api.RAtomicLong;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
@@ -31,6 +32,9 @@ import tw.org.topbs.service.ScheduleEmailTaskService;
 @RequiredArgsConstructor
 public class AttendeesMailStrategy implements MailStrategy {
 
+	@Value("${project.domain}")
+	private String PROJECT_DOMAIN;
+	
 	@Qualifier("businessRedissonClient")
 	private final RedissonClient redissonClient;
 
@@ -159,7 +163,7 @@ public class AttendeesMailStrategy implements MailStrategy {
 
 	private String replaceAttendeesMergeTag(String content, AttendeesVO attendeesVO) {
 
-		String qrCodeUrl = String.format("https://iopbs.org.tw/prod-api/attendees/qrcode?attendeesId=%s",
+		String qrCodeUrl = String.format(PROJECT_DOMAIN + "/prod-api/attendees/qrcode?attendeesId=%s",
 				attendeesVO.getAttendeesId());
 
 		String newContent = content.replace("{{QRcode}}", "<img src=\"" + qrCodeUrl + "\" alt=\"QR Code\" />")

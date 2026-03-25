@@ -126,7 +126,7 @@ public class PaperReviewManager {
 			// 第三步：判斷並批量新增 PaperReviewerTag (審稿人資格標籤)
 			// 拿到該階段審稿人的總數,這時已經是DB中有新增關聯的實際數量了
 			long reviewerCount = paperAndPaperReviewerService.getReviewerCountByReviewStage(reviewStage);
-			int groupIndex = (int) Math.ceil(reviewerCount / GROUP_SIZE);
+			int groupIndex = (int) Math.ceil(reviewerCount / (double) GROUP_SIZE);
 
 			// 第四步：根據審核階段,給予不同的tag,目前新增tag會有額外tag產生的情況
 			switch (reviewStageEnum) {
@@ -179,8 +179,8 @@ public class PaperReviewManager {
 		// 2.獲取當前審稿狀態
 		ReviewStageEnum reviewStageEnum = ReviewStageEnum.fromValue(reviewStage);
 
-		// 3.獲取全部的稿件 及 評審
-		List<Paper> paperList = paperService.getPapersEfficiently();
+		// 3.獲取階段的稿件 及 評審
+		List<Paper> paperList = paperService.getPapersByReviewStage(reviewStageEnum);
 		List<PaperReviewer> reviewerList = paperReviewerService.getReviewersEfficiently();
 
 		// 4.如果任一資料為空，就不處理

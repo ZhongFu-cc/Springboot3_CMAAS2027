@@ -227,7 +227,7 @@ project:
   # 活動名稱縮寫/別名
   alias: topbs2026
   # 語言，可選值zh_TW / en ，用於選擇中文信zh_TW 或 英文信en
-  language: zh_TW
+  language: en
   # Banner 圖片
   banner-url: https://tobss.org.tw/_nuxt/260310-home-banner.Djhj-gRq.jpg
   # 群組相關，與一次寄送 email 數量有關

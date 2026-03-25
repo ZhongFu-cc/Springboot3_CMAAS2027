@@ -292,9 +292,9 @@ public class PaperManager {
 		// 5.新增稿件附件，拿到要放進信件中的PDF檔案
 		List<ByteArrayResource> paperPDFFiles = paperFileUploadService.addPaperFileUpload(paper, files);
 
-		// 6.獲取當下與會者群體的Index,進行與會者標籤分組
+		// 6.獲取當下 投稿者 群體的Index,進行 投稿者 標籤分組
 		tagAssignmentHelper.assignTag(paper.getPaperId(), paperService::getPaperGroupIndex,
-				tagService::getOrCreateAttendeesGroupTag, paperTagService::addPaperTag);
+				tagService::getOrCreatePaperGroupTag, paperTagService::addPaperTag);
 
 		// 7.產生通知信件，並寄出給通訊作者
 		EmailBodyContent abstractSuccessContent = notificationService.generateAbstractSuccessContent(paper);

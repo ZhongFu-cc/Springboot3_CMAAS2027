@@ -11,6 +11,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import tw.org.topbs.enums.ReviewStageEnum;
 import tw.org.topbs.pojo.DTO.PutPaperForAdminDTO;
 import tw.org.topbs.pojo.DTO.addEntityDTO.AddPaperDTO;
 import tw.org.topbs.pojo.DTO.putEntityDTO.PutPaperDTO;
@@ -92,6 +93,16 @@ public interface PaperService extends IService<Paper> {
 	 * @return
 	 */
 	List<Paper> getPapersEfficiently();
+	
+	/**
+	 * mybatis 原始高速查詢所有Paper<br>
+	 * 接收審核階段，再去判斷使用哪個paperStauts 當作查詢條件
+	 * 
+	 * @param reviewStageEnum
+	 * @return
+	 */
+	List<Paper> getPapersByReviewStage(ReviewStageEnum reviewStageEnum);
+	
 
 	List<Paper> getPaperListByIds(Collection<Long> paperIds);
 

@@ -118,6 +118,12 @@ public class AttendeesTagServiceImpl extends ServiceImpl<AttendeesTagMapper, Att
 
 	@Override
 	public Map<Long, List<Tag>> getTagMapByAttendeesId(Collection<Attendees> attendeesList) {
+		
+		// 如果列表為空,則返回空Map
+		if(attendeesList.isEmpty()) {
+			return Collections.emptyMap();
+		}
+		
 		// 1.將attendeesList提取attendeesId ，獲取所有關聯
 		Set<Long> attnedeesIdSet = attendeesList.stream().map(Attendees::getAttendeesId).collect(Collectors.toSet());
 		List<AttendeesTag> attendeesTags = this.getAttendeesTagByAttendeesIds(attnedeesIdSet);

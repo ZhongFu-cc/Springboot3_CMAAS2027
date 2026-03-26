@@ -3,8 +3,10 @@ package tw.org.topbs.pojo.excelPojo;
 import java.time.LocalDate;
 
 import com.alibaba.excel.annotation.ExcelProperty;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 @Data
@@ -15,7 +17,7 @@ public class PaperScoreExcel {
 
 	@ExcelProperty("會員ID")
 	private String memberId;
-	
+
 	@ExcelProperty("會員註冊費繳費狀態")
 	private String memberPaymentStatus;
 
@@ -52,6 +54,9 @@ public class PaperScoreExcel {
 
 	@ExcelProperty("主講者")
 	private String speaker;
+
+	@ExcelProperty("主講者信箱")
+	private String speakerEmail;
 
 	@ExcelProperty("主講者單位")
 	private String speakerAffiliation;

@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
@@ -296,9 +298,14 @@ public class PaperManager {
 		tagAssignmentHelper.assignTag(paper.getPaperId(), paperService::getPaperGroupIndex,
 				tagService::getOrCreatePaperGroupTag, paperTagService::addPaperTag);
 
-		// 7.產生通知信件，並寄出給通訊作者
+		// 7.使用 Stream 組裝 Email List，並過濾掉 null、空字串以及重複的 Email
+		List<String> recipients = Stream.of(paper.getSpeakerEmail(), paper.getCorrespondingAuthorEmail())
+				.filter(email -> email != null && !email.trim().isEmpty())
+				.collect(Collectors.toList());
+
+		// 8.產生通知信件，並寄出給主講者 和 通訊作者
 		EmailBodyContent abstractSuccessContent = notificationService.generateAbstractSuccessContent(paper);
-		asyncService.sendCommonEmail(paper.getCorrespondingAuthorEmail(), "Abstract Submission Confirmation",
+		asyncService.sendCommonEmail(recipients, "Abstract Submission Confirmation",
 				abstractSuccessContent.getHtmlContent(), abstractSuccessContent.getPlainTextContent(), paperPDFFiles);
 
 	}

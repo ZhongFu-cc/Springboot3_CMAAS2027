@@ -45,6 +45,10 @@ public class PutPaperDTO {
 	@NotBlank
 	@Schema(description = "主講者")
 	private String speaker;
+	
+	@NotBlank
+	@Schema(description = "主講者信箱")
+	private String speakerEmail;
 
 	@NotBlank
 	@Schema(description = "主講者單位_國際會議所以只收英文")

@@ -3,6 +3,8 @@ package tw.org.topbs.pojo.entity;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -67,6 +69,10 @@ public class Paper implements Serializable {
 	@Schema(description = "主講者")
 	@TableField("speaker")
 	private String speaker;
+
+	@Schema(description = "主講者信箱")
+	@TableField("speaker_email")
+	private String speakerEmail;
 
 	@Schema(description = "主講者單位_國際會議所以只收英文")
 	@TableField("speaker_affiliation")
@@ -138,4 +144,18 @@ public class Paper implements Serializable {
 	@TableField("is_deleted")
 	@TableLogic
 	private Integer isDeleted;
+
+	/**
+	 * 獲取主講者 email 和 通訊作者 email，並組合成一個逗號分隔的 String
+	 * 包含：過濾 null、去除空白、去重
+	 * 
+	 * @return 逗號分隔的 Email 字串 (例如: "a@test.com,b@test.com")
+	 */
+	public String getAllEmail() {
+		return Stream.of(this.getSpeakerEmail(), this.getCorrespondingAuthorEmail())
+				.filter(email -> email != null && !email.trim().isEmpty()) // 過濾 null 與空字串
+				.map(String::trim) // 去除前後空格
+				.collect(Collectors.joining(",")); // 用逗號組裝
+	}
+
 }

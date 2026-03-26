@@ -5,7 +5,8 @@ import org.springframework.stereotype.Component;
 import cn.dev33.satoken.stp.SaTokenInfo;
 import lombok.RequiredArgsConstructor;
 import tw.org.topbs.pojo.DTO.EmailBodyContent;
-import tw.org.topbs.pojo.DTO.MemberLoginInfo;
+import tw.org.topbs.pojo.DTO.MemberEmailLogin;
+import tw.org.topbs.pojo.DTO.MemberIdCardLogin;
 import tw.org.topbs.pojo.entity.Member;
 import tw.org.topbs.service.AsyncService;
 import tw.org.topbs.service.MemberService;
@@ -20,13 +21,23 @@ public class MemberAuthManager {
 	private final AsyncService asyncService;
 
 	/**
-	 * 會員登入
+	 * 會員登入 - Email & Password
 	 * 
-	 * @param memberLoginInfo
+	 * @param memberEmailLogin
 	 * @return
 	 */
-	public SaTokenInfo login(MemberLoginInfo memberLoginInfo) {
-		return memberService.login(memberLoginInfo);
+	public SaTokenInfo login(MemberEmailLogin memberEmailLogin) {
+		return memberService.login(memberEmailLogin);
+	}
+	
+	/**
+	 * 會員登入 - IdCard & Password
+	 * 
+	 * @param memberIdCardLogin
+	 * @return
+	 */
+	public SaTokenInfo login(MemberIdCardLogin memberIdCardLogin) {
+		return memberService.login(memberIdCardLogin);
 	}
 
 	/**

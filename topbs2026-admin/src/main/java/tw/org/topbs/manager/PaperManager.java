@@ -392,7 +392,8 @@ public class PaperManager {
 
 			// 3. 狀態轉換校驗
 			if (!this.isValidStatusTransition(oldPaper.getStatus(), dto.getStatus())) {
-				return "不合規的狀態轉換: " + oldPaper.getStatus() + " -> " + dto.getStatus();
+				return "不合規的狀態轉換: " + PaperStatusEnum.fromValue(oldPaper.getStatus()).getLabelZh() + " -> "
+						+ PaperStatusEnum.fromValue(dto.getStatus()).getLabelZh();
 			}
 
 			// 4. 合法轉換：更新資料並處理標籤

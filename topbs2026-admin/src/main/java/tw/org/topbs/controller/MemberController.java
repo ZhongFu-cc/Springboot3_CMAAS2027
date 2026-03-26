@@ -7,7 +7,6 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import org.redisson.api.RedissonClient;
-import org.simpleframework.xml.core.Validate;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -46,7 +45,8 @@ import tw.org.topbs.manager.MemberTagManager;
 import tw.org.topbs.pojo.DTO.AddMemberForAdminDTO;
 import tw.org.topbs.pojo.DTO.ForgetPwdDTO;
 import tw.org.topbs.pojo.DTO.GroupRegistrationDTO;
-import tw.org.topbs.pojo.DTO.MemberLoginInfo;
+import tw.org.topbs.pojo.DTO.MemberEmailLogin;
+import tw.org.topbs.pojo.DTO.MemberIdCardLogin;
 import tw.org.topbs.pojo.DTO.PutMemberIdDTO;
 import tw.org.topbs.pojo.DTO.addEntityDTO.AddMemberDTO;
 import tw.org.topbs.pojo.DTO.addEntityDTO.AddTagToMemberDTO;
@@ -307,13 +307,13 @@ public class MemberController {
 	}
 
 	/** 以下與會員登入有關 */
-	@Operation(summary = "會員登入")
+	@Operation(summary = "會員登入-使用 email 和 password")
 	@PostMapping("login")
-	public R<SaTokenInfo> login(@Validate @RequestBody MemberLoginInfo memberLoginInfo) {
+	public R<SaTokenInfo> login(@Valid @RequestBody MemberEmailLogin memberEmailLogin) {
 
 		// 透過key 獲取redis中的驗證碼
-		String redisCode = redissonClient.<String>getBucket(memberLoginInfo.getVerificationKey()).get();
-		String userVerificationCode = memberLoginInfo.getVerificationCode();
+		String redisCode = redissonClient.<String>getBucket(memberEmailLogin.getVerificationKey()).get();
+		String userVerificationCode = memberEmailLogin.getVerificationCode();
 
 		// 判斷驗證碼是否正確,如果不正確就直接返回前端,不做後續的業務處理
 		if (userVerificationCode == null || redisCode == null
@@ -322,8 +322,28 @@ public class MemberController {
 		}
 
 		// 驗證通過,刪除key 並往後執行添加操作
-		redissonClient.getBucket(memberLoginInfo.getVerificationKey()).delete();
-		SaTokenInfo tokenInfo = memberAuthManager.login(memberLoginInfo);
+		redissonClient.getBucket(memberEmailLogin.getVerificationKey()).delete();
+		SaTokenInfo tokenInfo = memberAuthManager.login(memberEmailLogin);
+		return R.ok(tokenInfo);
+	}
+
+	@Operation(summary = "會員登入-使用 id_card 和 password")
+	@PostMapping("login-idCard")
+	public R<SaTokenInfo> login(@Valid @RequestBody MemberIdCardLogin memberIdCardLogin) {
+
+		// 透過key 獲取redis中的驗證碼
+		String redisCode = redissonClient.<String>getBucket(memberIdCardLogin.getVerificationKey()).get();
+		String userVerificationCode = memberIdCardLogin.getVerificationCode();
+
+		// 判斷驗證碼是否正確,如果不正確就直接返回前端,不做後續的業務處理
+		if (userVerificationCode == null || redisCode == null
+				|| !redisCode.equals(userVerificationCode.trim().toLowerCase())) {
+			return R.fail("Verification code is incorrect");
+		}
+
+		// 驗證通過,刪除key 並往後執行添加操作
+		redissonClient.getBucket(memberIdCardLogin.getVerificationKey()).delete();
+		SaTokenInfo tokenInfo = memberAuthManager.login(memberIdCardLogin);
 		return R.ok(tokenInfo);
 	}
 

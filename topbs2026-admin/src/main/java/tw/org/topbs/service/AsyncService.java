@@ -34,6 +34,27 @@ public interface AsyncService {
 	void sendCommonEmail(String to, String subject, String htmlContent, String plainTextContent,
 			List<ByteArrayResource> attachments);
 
+	/**
+	 * 重載，寄送單獨用戶的信件使用，呼叫時觸發一個線程，單獨去執行寄信任務，加速呼叫API的響應速度
+	 * 
+	 * @param to               收件者
+	 * @param subject          主旨
+	 * @param htmlContent      HTML內容
+	 * @param plainTextContent 純文字內容
+	 */
+	void sendCommonEmail(List<String> to, String subject, String htmlContent, String plainTextContent);
+
+	/**
+	 * 重載，寄送單獨用戶的信件使用，呼叫時觸發一個線程，單獨去執行寄信任務，加速呼叫API的響應速度(可攜帶附件)
+	 * 
+	 * @param to               收件者
+	 * @param subject          主旨
+	 * @param htmlContent      HTML內容
+	 * @param plainTextContent 純文字內容
+	 * @param attachments      附件檔案列表
+	 */
+	void sendCommonEmail(List<String> to, String subject, String htmlContent, String plainTextContent,
+			List<ByteArrayResource> attachments);
 
 	/**
 	 * 裡面會根據寄出10封信件等3秒的模式，避免控制寄信速率
@@ -66,6 +87,7 @@ public interface AsyncService {
 	 * 
 	 * @param scheduleEmailRecord
 	 */
-	public void triggerSendEmail(ScheduleEmailTask scheduleEmailTask,List<ScheduleEmailRecord> scheduleEmailRecordList);
+	public void triggerSendEmail(ScheduleEmailTask scheduleEmailTask,
+			List<ScheduleEmailRecord> scheduleEmailRecordList);
 
 }

@@ -5,11 +5,13 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
-public class MemberLoginInfo {
+public class MemberEmailLogin {
 
+	@NotBlank
 	@Schema(description = "主要信箱")
 	private String email;
 
+	@NotBlank
 	@Schema(description = "密碼")
 	private String password;
 	

@@ -34,7 +34,8 @@ import tw.org.topbs.helper.MessageHelper;
 import tw.org.topbs.mapper.MemberMapper;
 import tw.org.topbs.pojo.DTO.AddGroupMemberDTO;
 import tw.org.topbs.pojo.DTO.AddMemberForAdminDTO;
-import tw.org.topbs.pojo.DTO.MemberLoginInfo;
+import tw.org.topbs.pojo.DTO.MemberEmailLogin;
+import tw.org.topbs.pojo.DTO.MemberIdCardLogin;
 import tw.org.topbs.pojo.DTO.WalkInRegistrationDTO;
 import tw.org.topbs.pojo.DTO.addEntityDTO.AddMemberDTO;
 import tw.org.topbs.pojo.DTO.putEntityDTO.PutMemberForAdminDTO;
@@ -422,8 +423,24 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 		return tokenInfo;
 	}
 
+	/**
+	 * 透過Member資訊,返回TokenInfo
+	 * 
+	 * @param member
+	 * @return
+	 */
+	private SaTokenInfo returnSaTokenInfo(Member member) {
+		// 之後應該要以這個會員ID 產生Token 回傳前端，讓他直接進入登入狀態
+		StpKit.MEMBER.login(member.getMemberId());
+		// 登入後才能取得session
+		SaSession session = StpKit.MEMBER.getSession();
+		// 並對此token 設置會員的緩存資料
+		session.set(MEMBER_CACHE_INFO_KEY, member);
+		return StpKit.MEMBER.getTokenInfo();
+	}
+
 	@Override
-	public SaTokenInfo login(MemberLoginInfo memberLoginInfo) {
+	public SaTokenInfo login(MemberEmailLogin memberLoginInfo) {
 		LambdaQueryWrapper<Member> memberQueryWrapper = new LambdaQueryWrapper<>();
 		memberQueryWrapper.eq(Member::getEmail, memberLoginInfo.getEmail())
 				.eq(Member::getPassword, memberLoginInfo.getPassword());
@@ -431,16 +448,25 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 		Member member = baseMapper.selectOne(memberQueryWrapper);
 
 		if (member != null) {
-			// 之後應該要以這個會員ID 產生Token 回傳前端，讓他直接進入登入狀態
-			StpKit.MEMBER.login(member.getMemberId());
+			return this.returnSaTokenInfo(member);
+		}
 
-			// 登入後才能取得session
-			SaSession session = StpKit.MEMBER.getSession();
-			// 並對此token 設置會員的緩存資料
-			session.set(MEMBER_CACHE_INFO_KEY, member);
-			SaTokenInfo tokenInfo = StpKit.MEMBER.getTokenInfo();
+		// 如果 member為null , 則直接拋出異常
+		throw new AccountPasswordWrongException(messageHelper.get(I18nMessageKey.Registration.Auth.WRONG_ACCOUNT));
 
-			return tokenInfo;
+	}
+
+	@Override
+	public SaTokenInfo login(MemberIdCardLogin memberIdCardLogin) {
+		// 透過idCard 和 password 查詢Member資訊
+		LambdaQueryWrapper<Member> memberQueryWrapper = new LambdaQueryWrapper<>();
+		memberQueryWrapper.eq(Member::getIdCard, memberIdCardLogin.getIdCard())
+				.eq(Member::getPassword, memberIdCardLogin.getPassword());
+		
+		Member member = baseMapper.selectOne(memberQueryWrapper);
+
+		if (member != null) {
+			return this.returnSaTokenInfo(member);
 		}
 
 		// 如果 member為null , 則直接拋出異常

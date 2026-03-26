@@ -11,7 +11,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import cn.dev33.satoken.stp.SaTokenInfo;
 import tw.org.topbs.pojo.DTO.AddGroupMemberDTO;
 import tw.org.topbs.pojo.DTO.AddMemberForAdminDTO;
-import tw.org.topbs.pojo.DTO.MemberLoginInfo;
+import tw.org.topbs.pojo.DTO.MemberEmailLogin;
+import tw.org.topbs.pojo.DTO.MemberIdCardLogin;
 import tw.org.topbs.pojo.DTO.WalkInRegistrationDTO;
 import tw.org.topbs.pojo.DTO.addEntityDTO.AddMemberDTO;
 import tw.org.topbs.pojo.DTO.putEntityDTO.PutMemberForAdminDTO;
@@ -173,12 +174,20 @@ public interface MemberService extends IService<Member> {
 	SaTokenInfo login(Member member);
 
 	/**
-	 * 會員登入
+	 * 會員登入 - Email & Password
 	 * 
-	 * @param memberLoginInfo
+	 * @param memberEmailLogin
 	 * @return
 	 */
-	SaTokenInfo login(MemberLoginInfo memberLoginInfo);
+	SaTokenInfo login(MemberEmailLogin memberEmailLogin);
+	
+	/**
+	 * 會員登入 - IdCard & Password
+	 * 
+	 * @param memberIdCardLogin
+	 * @return
+	 */
+	SaTokenInfo login(MemberIdCardLogin memberIdCardLogin);
 
 	/**
 	 * 會員登出

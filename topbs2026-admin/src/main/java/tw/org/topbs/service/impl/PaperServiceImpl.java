@@ -164,7 +164,9 @@ public class PaperServiceImpl extends ServiceImpl<PaperMapper, Paper> implements
 								.or()
 								.like(Paper::getCorrespondingAuthorPhone, queryText)
 								.or()
-								.like(Paper::getCorrespondingAuthorEmail, queryText));
+								.like(Paper::getCorrespondingAuthorEmail, queryText)
+								.or()
+								.like(Paper::getSpeakerEmail,queryText));
 
 		return baseMapper.selectPage(pageable, paperQueryWrapper);
 	}

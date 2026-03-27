@@ -93,7 +93,7 @@ public class PaperMailStrategy implements MailStrategy {
 		paperList = this.getPaperListByTagIds(tagIdList);
 
 		//前面已排除null 和 0 的狀況，開 異步線程 直接開始遍歷寄信，這邊是寄給
-		asyncService.batchSendEmail(paperList, sendEmailDTO, Paper::getCorrespondingAuthorEmail,
+		asyncService.batchSendEmail(paperList, sendEmailDTO, Paper::getAllEmail,
 				this::replacePaperMergeTag);
 
 		// 額度直接扣除 查詢到的稿件(通訊作者)數量
@@ -109,7 +109,7 @@ public class PaperMailStrategy implements MailStrategy {
 
 		// 2.放入排程任務
 		scheduleEmailTaskService.processScheduleEmailTask(sendEmailDTO, paperList, "paper",
-				Paper::getCorrespondingAuthorEmail, this::replacePaperMergeTag);
+				Paper::getAllEmail, this::replacePaperMergeTag);
 	}
 
 	private List<Paper> getPaperListByTagIds(Collection<Long> tagIdList) {
@@ -144,6 +144,12 @@ public class PaperMailStrategy implements MailStrategy {
 
 	}
 
+	/**
+	 * 替換 投稿者 的MergeTag
+	 * @param content
+	 * @param paper
+	 * @return
+	 */
 	private String replacePaperMergeTag(String content, Paper paper) {
 		String newContent;
 
@@ -152,6 +158,7 @@ public class PaperMailStrategy implements MailStrategy {
 				.replace("{{absTitle}}", Strings.nullToEmpty(paper.getAbsTitle()))
 				.replace("{{firstAuthor}}", Strings.nullToEmpty(paper.getFirstAuthor()))
 				.replace("{{speaker}}", Strings.nullToEmpty(paper.getSpeaker()))
+				.replace("{{speakerEmail}}", Strings.nullToEmpty(paper.getSpeakerEmail()))
 				.replace("{{speakerAffiliation}}", Strings.nullToEmpty(paper.getSpeakerAffiliation()))
 				.replace("{{correspondingAuthor}}", Strings.nullToEmpty(paper.getCorrespondingAuthor()))
 				.replace("{{correspondingAuthorEmail}}", Strings.nullToEmpty(paper.getCorrespondingAuthorEmail()));

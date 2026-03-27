@@ -312,14 +312,29 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 	 * @param member
 	 */
 	private void validateAndAddMember(Member member) {
-		LambdaQueryWrapper<Member> memberQueryWrapper = new LambdaQueryWrapper<>();
-		memberQueryWrapper.eq(Member::getEmail, member.getEmail());
-		Long memberCount = baseMapper.selectCount(memberQueryWrapper);
 
-		if (memberCount > 0) {
+		// 判斷email是否重複註冊
+		LambdaQueryWrapper<Member> emailQueryWrapper = new LambdaQueryWrapper<>();
+		emailQueryWrapper.eq(Member::getEmail, member.getEmail());
+		Long emailCount = baseMapper.selectCount(emailQueryWrapper);
+
+		if (emailCount > 0) {
 			throw new RegisteredAlreadyExistsException(
 					messageHelper.get(I18nMessageKey.Registration.Auth.EMAIL_REGISTERED));
 		}
+
+		if (member.getIdCard() != null) {
+			// 判斷身分證是否重複註冊
+			LambdaQueryWrapper<Member> idCardQueryWrapper = new LambdaQueryWrapper<>();
+			idCardQueryWrapper.eq(Member::getIdCard, member.getIdCard());
+			Long idCardCount = baseMapper.selectCount(idCardQueryWrapper);
+
+			if (idCardCount > 0) {
+				throw new RegisteredAlreadyExistsException(
+						messageHelper.get(I18nMessageKey.Registration.Auth.ID_CARD_REGISTERED));
+			}
+		}
+
 		baseMapper.insert(member);
 
 	}
@@ -462,7 +477,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 		LambdaQueryWrapper<Member> memberQueryWrapper = new LambdaQueryWrapper<>();
 		memberQueryWrapper.eq(Member::getIdCard, memberIdCardLogin.getIdCard())
 				.eq(Member::getPassword, memberIdCardLogin.getPassword());
-		
+
 		Member member = baseMapper.selectOne(memberQueryWrapper);
 
 		if (member != null) {

@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import org.redisson.api.RAtomicLong;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Component;
 
@@ -36,6 +37,10 @@ public class PaperReviewerMailStrategy implements MailStrategy {
 	@Qualifier("businessRedissonClient")
 	private final RedissonClient redissonClient;
 
+	// 「預設」存储桶名称
+	@Value("${spring.cloud.aws.s3.bucketName}") // 注意：这里的 Value key 可能需要对应您的配置
+	private String bucketName;
+	
 	private static final String DAILY_EMAIL_QUOTA_KEY = "email:dailyQuota";
 	private final PaperReviewerService paperReviewerService;
 	private final PaperReviewerTagService paperReviewerTagService;
@@ -186,8 +191,11 @@ public class PaperReviewerMailStrategy implements MailStrategy {
 
 		for (PaperReviewerFile paperReviewerFile : paperReviewerFiles) {
 			try {
+				
+				// DBUrl中提取S3Key,使用默認bucketName
+				String s3Key = s3Util.extractS3PathInDbUrl(bucketName,paperReviewerFile.getPath());
 				// 獲取檔案位元組
-				byte[] fileBytes = s3Util.getFileBytes(paperReviewerFile.getPath());
+				byte[] fileBytes = s3Util.getFileBytes(s3Key);
 
 				if (fileBytes != null) {
 					ByteArrayResource resource = new ByteArrayResource(fileBytes) {

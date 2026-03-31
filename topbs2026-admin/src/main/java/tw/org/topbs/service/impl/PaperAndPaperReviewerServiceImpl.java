@@ -240,14 +240,16 @@ public class PaperAndPaperReviewerServiceImpl extends ServiceImpl<PaperAndPaperR
 	}
 
 	@Override
-	public void submitReviewScore(PutPaperReviewDTO putPaperReviewDTO) {
+	public PaperAndPaperReviewer submitReviewScore(PutPaperReviewDTO putPaperReviewDTO) {
 		PaperAndPaperReviewer putPaperAndPaperReviewer = paperAndPaperReviewerConvert.putDTOToEntity(putPaperReviewDTO);
 		baseMapper.updateById(putPaperAndPaperReviewer);
+		
+		return  baseMapper.selectById(putPaperAndPaperReviewer);
 
 	}
 
 	@Override
-	public Boolean isReviewFinished(String reviewStage, Long paperReviewerId) {
+	public boolean isReviewFinished(String reviewStage, Long paperReviewerId) {
 		LambdaQueryWrapper<PaperAndPaperReviewer> queryWrapper = new LambdaQueryWrapper<>();
 		queryWrapper.eq(PaperAndPaperReviewer::getReviewStage, reviewStage)
 				.eq(PaperAndPaperReviewer::getPaperReviewerId, paperReviewerId)

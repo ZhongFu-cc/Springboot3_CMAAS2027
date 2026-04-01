@@ -161,10 +161,10 @@ public interface PaperAndPaperReviewerService extends IService<PaperAndPaperRevi
 	/**
 	 * 提交或更新審稿委員的評分和狀態
 	 * 這個方法將根據提供的 DTO 更新現有的評審記錄。
-	 * 
-	 * @param putPaperReviewDTO 包含各種ID、評分、審核階段狀態
+	 * @param putPaperReviewDTO
+	 * @return
 	 */
-	void submitReviewScore(PutPaperReviewDTO putPaperReviewDTO);
+	PaperAndPaperReviewer submitReviewScore(PutPaperReviewDTO putPaperReviewDTO);
 
 	/**
 	 * 根據審稿階段 和 審稿人ID 判斷是否評分結束
@@ -173,6 +173,6 @@ public interface PaperAndPaperReviewerService extends IService<PaperAndPaperRevi
 	 * @param paperReviewerId 審稿人ID
 	 * @return
 	 */
-	Boolean isReviewFinished(String reviewStage, Long paperReviewerId);
+	boolean isReviewFinished(String reviewStage, Long paperReviewerId);
 
 }

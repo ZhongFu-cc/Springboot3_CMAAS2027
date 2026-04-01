@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableLogic;
@@ -107,19 +108,19 @@ public class Paper implements Serializable {
 	private Integer sequenceNo;
 
 	@Schema(description = "發表編號")
-	@TableField("publication_number")
+	@TableField(value = "publication_number", updateStrategy = FieldStrategy.ALWAYS)
 	private String publicationNumber;
 
 	@Schema(description = "發表組別")
-	@TableField("publication_group")
+	@TableField(value = "publication_group", updateStrategy = FieldStrategy.ALWAYS)
 	private String publicationGroup;
 
 	@Schema(description = "報告地點")
-	@TableField("report_location")
+	@TableField(value = "report_location", updateStrategy = FieldStrategy.ALWAYS)
 	private String reportLocation;
 
 	@Schema(description = "報告時間")
-	@TableField("report_time")
+	@TableField(value = "report_time", updateStrategy = FieldStrategy.ALWAYS)
 	private String reportTime;
 
 	@Schema(description = "創建者")

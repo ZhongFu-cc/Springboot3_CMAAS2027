@@ -8,7 +8,7 @@ import lombok.Data;
 public class PaperReviewerLoginInfo {
 
 	@NotBlank
-	@Schema(description = "主要信箱")
+	@Schema(description = "帳號")
 	private String account;
 
 	@NotBlank

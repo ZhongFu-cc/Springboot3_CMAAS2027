@@ -36,6 +36,7 @@ import tw.org.topbs.pojo.DTO.AddGroupMemberDTO;
 import tw.org.topbs.pojo.DTO.AddMemberForAdminDTO;
 import tw.org.topbs.pojo.DTO.MemberEmailLogin;
 import tw.org.topbs.pojo.DTO.MemberIdCardLogin;
+import tw.org.topbs.pojo.DTO.MemberLoginDTO;
 import tw.org.topbs.pojo.DTO.WalkInRegistrationDTO;
 import tw.org.topbs.pojo.DTO.addEntityDTO.AddMemberDTO;
 import tw.org.topbs.pojo.DTO.putEntityDTO.PutMemberForAdminDTO;
@@ -46,6 +47,7 @@ import tw.org.topbs.pojo.entity.Member;
 import tw.org.topbs.pojo.entity.Orders;
 import tw.org.topbs.saToken.StpKit;
 import tw.org.topbs.service.MemberService;
+import tw.org.topbs.utils.CountryUtil;
 
 @Service
 @RequiredArgsConstructor
@@ -237,7 +239,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 	}
 
 	@Override
-	public IPage<MemberTagVO> getUnpaidMemberPage(Page<Member> page, List<Orders> orderList, String queryText) {
+	public IPage<MemberTagVO> getUnpaidMemberPage(Page<Member> page, List<Orders> orderList,String country, String queryText) {
 		// 1.從訂單表中提取出會員ID 列表
 		Set<Long> memberIdSet = orderList.stream().map(orders -> orders.getMemberId()).collect(Collectors.toSet());
 
@@ -247,12 +249,20 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 				.collect(Collectors.toMap(Orders::getMemberId, Orders::getTotalAmount,
 						(existing, replacement) -> existing));
 
+		// 判斷是否為本國籍
+		Boolean isNational = CountryUtil.isNational(country);
+		
 		// 如果會員ID不為Null 以及 集合內元素不為空
 		if (memberIdSet != null && !memberIdSet.isEmpty()) {
 
 			// 有 '註冊費' 這張訂單且處於未繳費的 memberIdList，且如果有額外查詢資料 or 進行模糊查詢
 			LambdaQueryWrapper<Member> memberWrapper = new LambdaQueryWrapper<>();
-			memberWrapper.in(Member::getMemberId, memberIdSet).and(StringUtils.isNotBlank(queryText), wrapper -> {
+			memberWrapper.in(Member::getMemberId, memberIdSet)
+			// 如果「本國人」,加搜尋條件,找國家 為 Taiwan的資料
+			.eq(isNational,Member::getCountry,CountryUtil.getHomeCountry())
+			// 如果「外國人」,加搜尋條件,找國家「不為」Taiwan的資料
+			.ne(!isNational,Member::getCountry,CountryUtil.getHomeCountry())
+			.and(StringUtils.isNotBlank(queryText), wrapper -> {
 				wrapper.like(Member::getRemitAccountLast5, queryText)
 						.or()
 						.like(Member::getChineseName, queryText)
@@ -488,6 +498,53 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 		throw new AccountPasswordWrongException(messageHelper.get(I18nMessageKey.Registration.Auth.WRONG_ACCOUNT));
 
 	}
+	
+	@Override
+	public SaTokenInfo foreignLogin(MemberLoginDTO memberLoginDTO) {
+
+		// 獲得本國國籍 <Taiwan>
+		String national = CountryUtil.getHomeCountry();
+
+		// 除了帳號和密碼，額外判斷國家不屬於 台灣
+		LambdaQueryWrapper<Member> memberQueryWrapper = new LambdaQueryWrapper<>();
+		memberQueryWrapper.eq(Member::getEmail, memberLoginDTO.getAccount())
+				.eq(Member::getPassword, memberLoginDTO.getPassword())
+				.ne(Member::getCountry, national);
+
+		Member member = baseMapper.selectOne(memberQueryWrapper);
+
+		if (member != null) {
+			return this.returnSaTokenInfo(member);
+		}
+
+		// 如果 member為null , 則直接拋出異常
+		throw new AccountPasswordWrongException(messageHelper.get(I18nMessageKey.Registration.Auth.WRONG_ACCOUNT));
+
+	}
+
+	@Override
+	public SaTokenInfo localLogin(MemberLoginDTO memberLoginDTO) {
+		// 獲得本國國籍 <Taiwan>
+		String national = CountryUtil.getHomeCountry();
+
+		// 除了帳號和密碼，額外判斷國家屬於 台灣
+		LambdaQueryWrapper<Member> memberQueryWrapper = new LambdaQueryWrapper<>();
+		memberQueryWrapper.eq(Member::getEmail, memberLoginDTO.getAccount())
+				.eq(Member::getPassword, memberLoginDTO.getPassword())
+				.eq(Member::getCountry, national);
+
+		Member member = baseMapper.selectOne(memberQueryWrapper);
+
+		if (member != null) {
+			return this.returnSaTokenInfo(member);
+		}
+
+		// 如果 member為null , 則直接拋出異常
+		throw new AccountPasswordWrongException(messageHelper.get(I18nMessageKey.Registration.Auth.WRONG_ACCOUNT));
+
+	}
+
+
 
 	@Override
 	public void logout() {

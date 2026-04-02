@@ -90,13 +90,13 @@ public class MemberOrderManager {
 	 * @param queryText
 	 * @return
 	 */
-	public IPage<MemberTagVO> getUnpaidMemberPage(Page<Member> page, String queryText) {
+	public IPage<MemberTagVO> getUnpaidMemberPage(Page<Member> page,String country, String queryText) {
 
 		// 1.獲取未付款的個人訂單 (外國團體報名不在此限)
 		List<Orders> unpaidRegistrationOrderList = ordersService.getUnpaidRegistrationOrderList();
 
 		// 2.獲取未付款的分頁對象
-		IPage<MemberTagVO> unpaidMemberPage = memberService.getUnpaidMemberPage(page, unpaidRegistrationOrderList,
+		IPage<MemberTagVO> unpaidMemberPage = memberService.getUnpaidMemberPage(page, unpaidRegistrationOrderList,country,
 				queryText);
 		return unpaidMemberPage;
 	}

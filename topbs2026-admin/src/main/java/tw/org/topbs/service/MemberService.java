@@ -88,11 +88,13 @@ public interface MemberService extends IService<Member> {
 	/**
 	 * 獲取尚未付款的會員列表
 	 * 
+	 * @param page
 	 * @param orderList
+	 * @param country
 	 * @param queryText
 	 * @return
 	 */
-	IPage<MemberTagVO> getUnpaidMemberPage(Page<Member> page, List<Orders> orderList, String queryText);
+	IPage<MemberTagVO> getUnpaidMemberPage(Page<Member> page, List<Orders> orderList,String country, String queryText);
 
 	/**
 	 * 拿到當前團體標籤的index

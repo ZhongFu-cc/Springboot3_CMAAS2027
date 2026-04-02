@@ -179,9 +179,10 @@ public class MemberController {
 			@Parameter(name = "Authorization", description = "請求頭token,token-value開頭必須為Bearer ", required = true, in = ParameterIn.HEADER) })
 	@Operation(summary = "根據條件,查詢註冊費未付款的會員列表")
 	public R<IPage<MemberTagVO>> getUnpaidMember(@RequestParam Integer page, @RequestParam Integer size,
+			@RequestParam(value = "country", required = true) String country,
 			@RequestParam(value = "queryText", required = false) String queryText) {
 		Page<Member> pageable = new Page<Member>(page, size);
-		IPage<MemberTagVO> unpaidMemberPage = memberOrderManager.getUnpaidMemberPage(pageable, queryText);
+		IPage<MemberTagVO> unpaidMemberPage = memberOrderManager.getUnpaidMemberPage(pageable,country, queryText);
 
 		return R.ok(unpaidMemberPage);
 	}

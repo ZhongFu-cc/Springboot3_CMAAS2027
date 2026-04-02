@@ -239,7 +239,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 	}
 
 	@Override
-	public IPage<MemberTagVO> getUnpaidMemberPage(Page<Member> page, List<Orders> orderList, String queryText) {
+	public IPage<MemberTagVO> getUnpaidMemberPage(Page<Member> page, List<Orders> orderList,String country, String queryText) {
 		// 1.從訂單表中提取出會員ID 列表
 		Set<Long> memberIdSet = orderList.stream().map(orders -> orders.getMemberId()).collect(Collectors.toSet());
 
@@ -249,12 +249,20 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 				.collect(Collectors.toMap(Orders::getMemberId, Orders::getTotalAmount,
 						(existing, replacement) -> existing));
 
+		// 判斷是否為本國籍
+		Boolean isNational = CountryUtil.isNational(country);
+		
 		// 如果會員ID不為Null 以及 集合內元素不為空
 		if (memberIdSet != null && !memberIdSet.isEmpty()) {
 
 			// 有 '註冊費' 這張訂單且處於未繳費的 memberIdList，且如果有額外查詢資料 or 進行模糊查詢
 			LambdaQueryWrapper<Member> memberWrapper = new LambdaQueryWrapper<>();
-			memberWrapper.in(Member::getMemberId, memberIdSet).and(StringUtils.isNotBlank(queryText), wrapper -> {
+			memberWrapper.in(Member::getMemberId, memberIdSet)
+			// 如果「本國人」,加搜尋條件,找國家 為 Taiwan的資料
+			.eq(isNational,Member::getCountry,CountryUtil.getHomeCountry())
+			// 如果「外國人」,加搜尋條件,找國家「不為」Taiwan的資料
+			.ne(!isNational,Member::getCountry,CountryUtil.getHomeCountry())
+			.and(StringUtils.isNotBlank(queryText), wrapper -> {
 				wrapper.like(Member::getRemitAccountLast5, queryText)
 						.or()
 						.like(Member::getChineseName, queryText)

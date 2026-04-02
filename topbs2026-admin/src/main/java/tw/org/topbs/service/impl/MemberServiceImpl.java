@@ -529,7 +529,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
 		// 除了帳號和密碼，額外判斷國家屬於 台灣
 		LambdaQueryWrapper<Member> memberQueryWrapper = new LambdaQueryWrapper<>();
-		memberQueryWrapper.eq(Member::getEmail, memberLoginDTO.getAccount())
+		memberQueryWrapper.eq(Member::getIdCard, memberLoginDTO.getAccount())
 				.eq(Member::getPassword, memberLoginDTO.getPassword())
 				.eq(Member::getCountry, national);
 

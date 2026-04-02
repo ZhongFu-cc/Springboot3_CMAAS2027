@@ -47,6 +47,7 @@ import tw.org.topbs.pojo.DTO.ForgetPwdDTO;
 import tw.org.topbs.pojo.DTO.GroupRegistrationDTO;
 import tw.org.topbs.pojo.DTO.MemberEmailLogin;
 import tw.org.topbs.pojo.DTO.MemberIdCardLogin;
+import tw.org.topbs.pojo.DTO.MemberLoginDTO;
 import tw.org.topbs.pojo.DTO.PutMemberIdDTO;
 import tw.org.topbs.pojo.DTO.addEntityDTO.AddMemberDTO;
 import tw.org.topbs.pojo.DTO.addEntityDTO.AddTagToMemberDTO;
@@ -344,6 +345,46 @@ public class MemberController {
 		// 驗證通過,刪除key 並往後執行添加操作
 		redissonClient.getBucket(memberIdCardLogin.getVerificationKey()).delete();
 		SaTokenInfo tokenInfo = memberAuthManager.login(memberIdCardLogin);
+		return R.ok(tokenInfo);
+	}
+
+	@Operation(summary = "「外國」會員登入 - 使用 email 和 password，國籍綁定為「非」台灣")
+	@PostMapping("login-foreign")
+	public R<SaTokenInfo> loginForForeign(@Valid @RequestBody MemberLoginDTO memberLoginDTO) {
+
+		// 透過key 獲取redis中的驗證碼
+		String redisCode = redissonClient.<String>getBucket(memberLoginDTO.getVerificationKey()).get();
+		String userVerificationCode = memberLoginDTO.getVerificationCode();
+
+		// 判斷驗證碼是否正確,如果不正確就直接返回前端,不做後續的業務處理
+		if (userVerificationCode == null || redisCode == null
+				|| !redisCode.equals(userVerificationCode.trim().toLowerCase())) {
+			return R.fail("Verification code is incorrect");
+		}
+
+		// 驗證通過,刪除key 並往後執行添加操作
+		redissonClient.getBucket(memberLoginDTO.getVerificationKey()).delete();
+		SaTokenInfo tokenInfo = memberAuthManager.foreignLogin(memberLoginDTO);
+		return R.ok(tokenInfo);
+	}
+
+	@Operation(summary = "「國內」會員登入 - 使用 id_card 和 password，國籍綁定為 台灣")
+	@PostMapping("login-local")
+	public R<SaTokenInfo> loginForLocal(@Valid @RequestBody MemberLoginDTO memberLoginDTO) {
+
+		// 透過key 獲取redis中的驗證碼
+		String redisCode = redissonClient.<String>getBucket(memberLoginDTO.getVerificationKey()).get();
+		String userVerificationCode = memberLoginDTO.getVerificationCode();
+
+		// 判斷驗證碼是否正確,如果不正確就直接返回前端,不做後續的業務處理
+		if (userVerificationCode == null || redisCode == null
+				|| !redisCode.equals(userVerificationCode.trim().toLowerCase())) {
+			return R.fail("Verification code is incorrect");
+		}
+
+		// 驗證通過,刪除key 並往後執行添加操作
+		redissonClient.getBucket(memberLoginDTO.getVerificationKey()).delete();
+		SaTokenInfo tokenInfo = memberAuthManager.localLogin(memberLoginDTO);
 		return R.ok(tokenInfo);
 	}
 

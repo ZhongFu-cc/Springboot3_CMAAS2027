@@ -36,6 +36,7 @@ import tw.org.topbs.pojo.DTO.AddGroupMemberDTO;
 import tw.org.topbs.pojo.DTO.AddMemberForAdminDTO;
 import tw.org.topbs.pojo.DTO.MemberEmailLogin;
 import tw.org.topbs.pojo.DTO.MemberIdCardLogin;
+import tw.org.topbs.pojo.DTO.MemberLoginDTO;
 import tw.org.topbs.pojo.DTO.WalkInRegistrationDTO;
 import tw.org.topbs.pojo.DTO.addEntityDTO.AddMemberDTO;
 import tw.org.topbs.pojo.DTO.putEntityDTO.PutMemberForAdminDTO;
@@ -46,6 +47,7 @@ import tw.org.topbs.pojo.entity.Member;
 import tw.org.topbs.pojo.entity.Orders;
 import tw.org.topbs.saToken.StpKit;
 import tw.org.topbs.service.MemberService;
+import tw.org.topbs.utils.CountryUtil;
 
 @Service
 @RequiredArgsConstructor
@@ -488,6 +490,53 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 		throw new AccountPasswordWrongException(messageHelper.get(I18nMessageKey.Registration.Auth.WRONG_ACCOUNT));
 
 	}
+	
+	@Override
+	public SaTokenInfo foreignLogin(MemberLoginDTO memberLoginDTO) {
+
+		// 獲得本國國籍 <Taiwan>
+		String national = CountryUtil.getHomeCountry();
+
+		// 除了帳號和密碼，額外判斷國家不屬於 台灣
+		LambdaQueryWrapper<Member> memberQueryWrapper = new LambdaQueryWrapper<>();
+		memberQueryWrapper.eq(Member::getEmail, memberLoginDTO.getAccount())
+				.eq(Member::getPassword, memberLoginDTO.getPassword())
+				.ne(Member::getCountry, national);
+
+		Member member = baseMapper.selectOne(memberQueryWrapper);
+
+		if (member != null) {
+			return this.returnSaTokenInfo(member);
+		}
+
+		// 如果 member為null , 則直接拋出異常
+		throw new AccountPasswordWrongException(messageHelper.get(I18nMessageKey.Registration.Auth.WRONG_ACCOUNT));
+
+	}
+
+	@Override
+	public SaTokenInfo localLogin(MemberLoginDTO memberLoginDTO) {
+		// 獲得本國國籍 <Taiwan>
+		String national = CountryUtil.getHomeCountry();
+
+		// 除了帳號和密碼，額外判斷國家屬於 台灣
+		LambdaQueryWrapper<Member> memberQueryWrapper = new LambdaQueryWrapper<>();
+		memberQueryWrapper.eq(Member::getEmail, memberLoginDTO.getAccount())
+				.eq(Member::getPassword, memberLoginDTO.getPassword())
+				.eq(Member::getCountry, national);
+
+		Member member = baseMapper.selectOne(memberQueryWrapper);
+
+		if (member != null) {
+			return this.returnSaTokenInfo(member);
+		}
+
+		// 如果 member為null , 則直接拋出異常
+		throw new AccountPasswordWrongException(messageHelper.get(I18nMessageKey.Registration.Auth.WRONG_ACCOUNT));
+
+	}
+
+
 
 	@Override
 	public void logout() {

@@ -13,6 +13,7 @@ import tw.org.topbs.pojo.DTO.AddGroupMemberDTO;
 import tw.org.topbs.pojo.DTO.AddMemberForAdminDTO;
 import tw.org.topbs.pojo.DTO.MemberEmailLogin;
 import tw.org.topbs.pojo.DTO.MemberIdCardLogin;
+import tw.org.topbs.pojo.DTO.MemberLoginDTO;
 import tw.org.topbs.pojo.DTO.WalkInRegistrationDTO;
 import tw.org.topbs.pojo.DTO.addEntityDTO.AddMemberDTO;
 import tw.org.topbs.pojo.DTO.putEntityDTO.PutMemberForAdminDTO;
@@ -190,6 +191,22 @@ public interface MemberService extends IService<Member> {
 	SaTokenInfo login(MemberIdCardLogin memberIdCardLogin);
 
 	/**
+	 * 「外國人」登入 - Email & Password 綁定國籍「非」台灣 
+	 * 
+	 * @param memberLoginDTO
+	 * @return
+	 */
+	SaTokenInfo foreignLogin(MemberLoginDTO memberLoginDTO);
+	
+	/**
+	 * 「本國人」登入 - IdCard & Password 綁定國籍 台灣 
+	 * 
+	 * @param memberLoginDTO
+	 * @return
+	 */
+	SaTokenInfo localLogin(MemberLoginDTO memberLoginDTO);
+	
+	/**
 	 * 會員登出
 	 */
 	void logout();
@@ -224,5 +241,7 @@ public interface MemberService extends IService<Member> {
 	 * @return memberId為key , Member為值得 Map對象
 	 */
 	Map<Long, Member> getMemberMap();
+
+	
 
 }

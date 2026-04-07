@@ -240,7 +240,7 @@ public class PaperFileUploadServiceImpl extends ServiceImpl<PaperFileUploadMappe
 
 			// 設定檔名
 			paperFileUpload.setFileName(fileName);
-			
+
 			// 設定檔案路徑
 			paperFileUpload.setPath(dbUrl);
 
@@ -318,7 +318,7 @@ public class PaperFileUploadServiceImpl extends ServiceImpl<PaperFileUploadMappe
 
 			// 設定檔名
 			paperFileUpload.setFileName(fileName);
-			
+
 			// 設定檔案路徑
 			paperFileUpload.setPath(dbUrl);
 
@@ -474,10 +474,16 @@ public class PaperFileUploadServiceImpl extends ServiceImpl<PaperFileUploadMappe
 			PaperFileUpload currentPaperFileUpload = this.getById(putSlideUploadDTO.getPaperFileUploadId());
 
 			// 刪除舊檔案 和 DB 紀錄
-			String oldS3Key = s3Util.extractS3PathInDbUrl(bucketName, currentPaperFileUpload.getPath());
+			String oldS3Key = s3Util.extractS3PathInDbUrl(bucketName, existPaperFileUpload.getPath());
+			String currentS3Key = s3Util.extractS3PathInDbUrl(bucketName, chunkResponseVO.getFilePath());
+			System.out.println("oldS3Key: " + oldS3Key);
+			System.out.println("此次更新Chunk File Path: " + currentS3Key);
 
 			// 當檔名不一樣時要刪除舊檔案，檔名相同S3會直接覆蓋
-			if (!oldS3Key.equals(chunkResponseVO.getFilePath())) {
+			if (!oldS3Key.equals(currentS3Key)) {
+
+				System.out.println("檔名不一致,移除檔案");
+
 				s3Util.removeFile(bucketName, oldS3Key);
 
 				// 檔名不一樣時，刪除分片上傳紀錄，一樣則不要刪,避免sysChunk紀錄混亂
@@ -486,7 +492,7 @@ public class PaperFileUploadServiceImpl extends ServiceImpl<PaperFileUploadMappe
 			}
 
 			// 設定檔案路徑，組裝 bucketName 和 Path 進資料庫當作真實路徑
-			currentPaperFileUpload.setPath("/" + bucketName + "/" + chunkResponseVO.getFilePath());
+			currentPaperFileUpload.setPath(chunkResponseVO.getFilePath());
 			// 設定檔案名稱
 			currentPaperFileUpload.setFileName(putSlideUploadDTO.getChunkUploadDTO().getFileName());
 			// 更新資料庫
@@ -519,7 +525,5 @@ public class PaperFileUploadServiceImpl extends ServiceImpl<PaperFileUploadMappe
 		baseMapper.delete(queryWrapper);
 
 	}
-
-
 
 }

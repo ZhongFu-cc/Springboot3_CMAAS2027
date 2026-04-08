@@ -145,7 +145,7 @@ public class PaperMailStrategy implements MailStrategy {
 	}
 
 	/**
-	 * 替換 投稿者 的MergeTag
+	 * 替換 投稿者 的MergeTag，要與前端配合
 	 * @param content
 	 * @param paper
 	 * @return
@@ -161,7 +161,13 @@ public class PaperMailStrategy implements MailStrategy {
 				.replace("{{speakerEmail}}", Strings.nullToEmpty(paper.getSpeakerEmail()))
 				.replace("{{speakerAffiliation}}", Strings.nullToEmpty(paper.getSpeakerAffiliation()))
 				.replace("{{correspondingAuthor}}", Strings.nullToEmpty(paper.getCorrespondingAuthor()))
-				.replace("{{correspondingAuthorEmail}}", Strings.nullToEmpty(paper.getCorrespondingAuthorEmail()));
+				.replace("{{correspondingAuthorEmail}}", Strings.nullToEmpty(paper.getCorrespondingAuthorEmail()))
+				.replace("{{publicationNumber}}", Strings.nullToEmpty(paper.getPublicationNumber()))
+				.replace("{{publicationGroup}}", Strings.nullToEmpty(paper.getPublicationGroup()))
+				.replace("{{reportLocation}}", Strings.nullToEmpty(paper.getReportLocation()))
+				.replace("{{reportTime}}", Strings.nullToEmpty(paper.getReportTime()))
+				.replace("{{presentationType}}", Strings.nullToEmpty(paper.getPresentationType()))
+				;
 
 		return newContent;
 	}

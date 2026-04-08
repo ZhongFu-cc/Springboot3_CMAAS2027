@@ -20,6 +20,9 @@ public class PaperVO {
 
 	@Schema(description = "會員ID")
 	private Long memberId;
+	
+	@Schema(description = "報告方式")
+	private String presentationType;
 
 	@Schema(description = "投稿類別")
 	private String absType;

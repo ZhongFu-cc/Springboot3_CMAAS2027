@@ -23,7 +23,6 @@ import tw.org.topbs.system.pojo.VO.ChunkResponseVO;
 @Validated
 public interface PaperFileUploadService extends IService<PaperFileUpload> {
 
-
 	PaperFileUpload getPaperFileUpload(Long paperFileUploadId);
 
 	List<PaperFileUpload> getPaperFileUploadList();
@@ -43,7 +42,7 @@ public interface PaperFileUploadService extends IService<PaperFileUpload> {
 	 * @return
 	 */
 	List<PaperFileUpload> getPaperFileListByPaperIds(Collection<Long> paperIds);
-	
+
 	/**
 	 * 根據 paper 列表 找到對應複數稿件的，投稿附件
 	 * 
@@ -51,25 +50,25 @@ public interface PaperFileUploadService extends IService<PaperFileUpload> {
 	 * @return
 	 */
 	List<PaperFileUpload> getPaperFileListByPapers(Collection<Paper> papers);
-	
+
 	/**
 	 * 根據 paper 列表 獲得稿件的映射對象
 	 * 
 	 * @param papers
 	 * @return 以paperId為key,List<PaperFileUpload> 為值得映射對象
 	 */
-	Map<Long,List<PaperFileUpload>> getFilesMapByPaperId(Collection<Paper> papers);
+	Map<Long, List<PaperFileUpload>> getFilesMapByPaperId(Collection<Paper> papers);
 
-	
 	/**
 	 * 根據paperId分組返回 搜尋第X階段投稿的附件(摘要)
 	 * 
-	 * @param paperIds 
+	 * @param paperIds
 	 * @param reviewStageEnum 第X階段審核
 	 * @return
 	 */
-	Map<Long, List<PaperFileUpload>> getPaperFileMapByPaperIdInReviewStage(Collection<Long> paperIds,ReviewStageEnum reviewStageEnum);
-	
+	Map<Long, List<PaperFileUpload>> getPaperFileMapByPaperIdInReviewStage(Collection<Long> paperIds,
+			ReviewStageEnum reviewStageEnum);
+
 	/**
 	 * 根據paperId分組返回 搜尋第一階段投稿的附件(摘要)
 	 * 
@@ -93,8 +92,6 @@ public interface PaperFileUploadService extends IService<PaperFileUpload> {
 	 * @return paperId為鍵 paperFileUpload 為值的Map
 	 */
 	Map<Long, List<PaperFileUpload>> groupFileUploadsByPaperId(Collection<Long> paperIds);
-	
-
 
 	/**
 	 * 根據paperId 在投稿附件列表中找到 word 和 pdf的檔案，
@@ -107,24 +104,25 @@ public interface PaperFileUploadService extends IService<PaperFileUpload> {
 
 	IPage<PaperFileUpload> getPaperFileUploadPage(Page<PaperFileUpload> page);
 
-
 	/**
 	 * 新增稿件附件，並返回PDF檔案,用於寄信使用
+	 * 
 	 * @param paper
 	 * @param files
 	 * @return
 	 */
-	List<ByteArrayResource> addPaperFileUpload(Paper paper,MultipartFile[] files);
+	List<ByteArrayResource> addPaperFileUpload(Paper paper, MultipartFile[] files);
 
 	/**
 	 * 更新稿件附件
+	 * 
 	 * @param paper
 	 * @param files
 	 */
-	void updatePaperFile(Paper paper,MultipartFile[] files);
+	void updatePaperFile(Paper paper, MultipartFile[] files);
 
 	void deletePaperFile(Long paperFileUploadId);
-	
+
 	void deletePaperFileByPaperId(Long paperId);
 
 	void deletePaperFileUploadList(List<Long> paperFileUploadIds);
@@ -147,7 +145,7 @@ public interface PaperFileUploadService extends IService<PaperFileUpload> {
 	 * @param file
 	 * @return
 	 */
-	ChunkResponseVO uploadSecondStagePaperFileChunk(Paper paper,@Valid AddSlideUploadDTO addSlideUploadDTO,
+	ChunkResponseVO uploadSecondStagePaperFileChunk(Paper paper, @Valid AddSlideUploadDTO addSlideUploadDTO,
 			MultipartFile file);
 
 	/**
@@ -158,7 +156,7 @@ public interface PaperFileUploadService extends IService<PaperFileUpload> {
 	 * @param file
 	 * @return
 	 */
-	ChunkResponseVO updateSecondStagePaperFileChunk(Paper paper,@Valid PutSlideUploadDTO putSlideUploadDTO,
+	ChunkResponseVO updateSecondStagePaperFileChunk(Paper paper, @Valid PutSlideUploadDTO putSlideUploadDTO,
 			MultipartFile file);
 
 	/**
@@ -168,5 +166,38 @@ public interface PaperFileUploadService extends IService<PaperFileUpload> {
 	 * @param paperFileUploadId
 	 */
 	void removeSecondStagePaperFile(Long paperId, Long paperFileUploadId);
+
+	/** ------------------- 稿件公文附件相關 ---------------------------------- */
+
+	/**
+	 * 根據稿件ID,拿到其 「公文」 檔案
+	 * 
+	 * @param paperId
+	 * @return
+	 */
+	List<PaperFileUpload> getOfficialDocumentsByPaperId(Long paperId);
+
+	/**
+	 * 為稿件新增「公文」 檔案
+	 * 
+	 * @param file
+	 * @param paperId
+	 */
+	void addOfficialDocument(MultipartFile file, Long paperId);
+
+	/**
+	 * 為稿件更新「公文」 檔案
+	 * 
+	 * @param file
+	 * @param paperFileId
+	 */
+	void updateOfficialDocument(MultipartFile file, Long paperFileId);
+
+	/**
+	 * 為稿件刪除「公文」 檔案
+	 * 
+	 * @param paperFileId
+	 */
+	void removeOfficialDocument(Long paperFileId);
 
 }

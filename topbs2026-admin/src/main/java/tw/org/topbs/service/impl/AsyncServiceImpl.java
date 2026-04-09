@@ -36,6 +36,10 @@ public class AsyncServiceImpl implements AsyncService {
 	private final JavaMailSender mailSender;
 	private final ScheduleEmailRecordService scheduleEmailRecordService;
 	private final S3Util s3Util;
+	
+	// 「預設」存储桶名称
+	@Value("${spring.cloud.aws.s3.bucketName}") // 注意：这里的 Value key 可能需要对应您的配置
+	private String bucketName;
 
 	@Value("${project.email.from}")
 	private String EMAIL_FROM;
@@ -211,7 +215,7 @@ public class AsyncServiceImpl implements AsyncService {
 				String email = sendEmailDTO.getIsTest() ? sendEmailDTO.getTestEmail() : emailExtractor.apply(recipient);
 
 				// 3. 查詢附件（判斷是否需要附件）
-				List<ByteArrayResource> attachments = Collections.emptyList();
+				List<ByteArrayResource> attachments = new ArrayList<>();
 				if (sendEmailDTO.getIncludeOfficialAttachment() && attachmentProvider != null) {
 					attachments = attachmentProvider.apply(recipient);
 				}
@@ -269,8 +273,10 @@ public class AsyncServiceImpl implements AsyncService {
 					// 將檔案列表遍歷拿到真正的檔案
 					for (String path : paths) {
 
+						String s3Key = s3Util.extractS3PathInDbUrl(bucketName, path);
+						
 						// 獲取檔案位元組
-						byte[] fileBytes = s3Util.getFileBytes(path);
+						byte[] fileBytes = s3Util.getFileBytes(s3Key);
 
 						if (fileBytes != null) {
 							// 解析檔名

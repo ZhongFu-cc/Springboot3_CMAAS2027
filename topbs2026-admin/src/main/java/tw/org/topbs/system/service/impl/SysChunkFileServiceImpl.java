@@ -114,8 +114,8 @@ public class SysChunkFileServiceImpl extends ServiceImpl<SysChunkFileMapper, Sys
 
 		String uploadId = (String) metaMap.get("uploadId");
 
-		// 組成S3 Key
-		String s3Key = s3Util.normalizePath(mergedBasePath) + chunkUploadDTO.getFileName();
+		// S3 key 宣告
+		String s3Key;
 
 		// 1. 斷點續傳檢查
 		if (uploadedPartsMap.containsKey(partNumber)) {
@@ -136,27 +136,16 @@ public class SysChunkFileServiceImpl extends ServiceImpl<SysChunkFileMapper, Sys
 				if (locked) {
 					uploadId = (String) metaMap.get("uploadId"); // 鎖內 double check
 					if (uploadId == null) {
-						System.out.println("開始初始化");
-						// 呼叫 S3Util 初始化
-						uploadId = s3Util.initializeMultipartUpload(s3Key, chunkUploadDTO.getFileType(),
-								Map.of("sha256", sha256));
 
-						System.out.println("初始化成功");
-
-						// 儲存初始化資訊
-						metaMap.put("uploadId", uploadId);
-						metaMap.put("totalChunks", totalChunks);
-						metaMap.put("fileName", chunkUploadDTO.getFileName());
-						metaMap.put("s3Key", s3Key);
-						metaMap.expire(Duration.ofHours(CACHE_EXPIRE_HOURS));
-						uploadedPartsMap.expire(Duration.ofHours(CACHE_EXPIRE_HOURS));
+						//宣告主鍵
+						Long primaryKey;
 
 						// 建立資料庫記錄（確保唯一性）
 						SysChunkFile exist = baseMapper.selectOne(new LambdaQueryWrapper<SysChunkFile>()
 								.eq(SysChunkFile::getFileSha256, chunkUploadDTO.getFileSha256()));
 						if (exist == null) {
 							SysChunkFile sysChunkFile = new SysChunkFile();
-							//sysChunkFile.setFileId(UUID.randomUUID().toString());
+							// FileId存儲無效
 							sysChunkFile.setFileId(uploadId);
 							sysChunkFile.setFileSha256(chunkUploadDTO.getFileSha256());
 							sysChunkFile.setFileName(chunkUploadDTO.getFileName());
@@ -165,7 +154,35 @@ public class SysChunkFileServiceImpl extends ServiceImpl<SysChunkFileMapper, Sys
 							sysChunkFile.setTotalChunks(chunkUploadDTO.getTotalChunks());
 							sysChunkFile.setUploadedChunks(uploadedPartsMap.size());
 							baseMapper.insert(sysChunkFile);
+
+							primaryKey = sysChunkFile.getSysChunkFileId();
+						} else {
+							primaryKey = exist.getSysChunkFileId();
 						}
+
+						// 提取檔名
+						int lastDotIndex = chunkUploadDTO.getFileName().lastIndexOf('.');
+						String baseName = chunkUploadDTO.getFileName().substring(0, lastDotIndex);
+						String extension = chunkUploadDTO.getFileName().substring(lastDotIndex);
+
+						// 組裝S3 Key
+						s3Key = s3Util.normalizePath(mergedBasePath) + baseName + "_" + primaryKey + extension;
+
+						System.out.println("開始初始化");
+						// 呼叫 S3Util 初始化
+						uploadId = s3Util.initializeMultipartUpload(s3Key, chunkUploadDTO.getFileType(),
+								Map.of("sha256", sha256));
+
+						System.out.println("初始化成功");
+
+						// 儲存初始化資訊
+						metaMap.put("s3Key", s3Key);
+						metaMap.put("totalChunks", totalChunks);
+						metaMap.put("fileName", chunkUploadDTO.getFileName());
+						metaMap.put("uploadId", uploadId);
+						metaMap.expire(Duration.ofHours(CACHE_EXPIRE_HOURS));
+						uploadedPartsMap.expire(Duration.ofHours(CACHE_EXPIRE_HOURS));
+
 					}
 				}
 			} catch (Exception e) {
@@ -180,6 +197,8 @@ public class SysChunkFileServiceImpl extends ServiceImpl<SysChunkFileMapper, Sys
 
 		// 3. 上傳分片
 		try {
+			// 從緩存中拿到S3 Key
+			s3Key = (String) metaMap.get("s3Key");
 
 			System.out.println(partNumber + "分片開始上傳");
 
@@ -242,7 +261,6 @@ public class SysChunkFileServiceImpl extends ServiceImpl<SysChunkFileMapper, Sys
 						finalPath);
 			}
 		}
-		
 
 		// 6. 最後回傳一個當前進度
 		return new ChunkResponseVO(currentUploadedCount, totalChunks, chunkUploadDTO.getChunkIndex(), sha256, null);

@@ -23,7 +23,7 @@ import tw.org.topbs.system.pojo.entity.SysChunkFile;
 
 @Validated
 public interface SysChunkFileService extends IService<SysChunkFile> {
-
+	
 	/**
 	 * 前端傳送檔案的SHA256值，用來判斷是否已經存在過這個檔案，用於實現秒傳
 	 * 

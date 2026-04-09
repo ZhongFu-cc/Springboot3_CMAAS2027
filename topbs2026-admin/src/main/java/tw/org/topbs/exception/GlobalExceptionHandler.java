@@ -77,6 +77,19 @@ public class GlobalExceptionHandler {
 		String message = exception.getMessage();
 		return R.fail(500, message);
 	}
+	
+	/**
+	 * 處理稿件 公文檔案 相關的異常
+	 * 
+	 * @param exception
+	 * @return
+	 */
+	@ResponseBody
+	@ExceptionHandler(value = PaperFileException.class)
+	public R<Map<String, Object>> paperFileException(PaperFileException exception) {
+		String message = exception.getMessage();
+		return R.fail(500, message);
+	}
 
 	/**
 	 * 處理自定義-Excel匯入 相關的異常

@@ -3,6 +3,7 @@ package tw.org.topbs.utils;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -716,8 +717,8 @@ public class S3Util {
 
 			CompleteMultipartUploadResponse response = s3Client.completeMultipartUpload(completeRequest);
 
-			String formatDbUrl = this.formatDbUrl(bucket,s3Key);
-			
+			String formatDbUrl = this.formatDbUrl(bucket, s3Key);
+
 			log.info("S3 分片合併完成: s3Key={}, location={}", s3Key, response.location());
 			return formatDbUrl;
 
@@ -855,7 +856,7 @@ public class S3Util {
 	 * @param s3Key
 	 */
 	private void deleteByKey(String bucketName, String s3Key) {
-		
+
 		String normalizeFilePath = this.normalizeFilePath(s3Key);
 
 		try {
@@ -870,7 +871,7 @@ public class S3Util {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * 嚴格模式,fileName 「不能」 為null 或者 空字串，否則報錯<br>
 	 * 刪除文件對象 (S3 使用 deleteObject)
@@ -882,7 +883,7 @@ public class S3Util {
 	public void removeFile(String bucketName, String fileName) {
 		this.deleteByKey(bucketName, fileName);
 	}
-	
+
 	/**
 	 * 寬容模式,fileName 「可以」 為null 或者 空字串，會忽略此次刪除且不會報錯<br>
 	 * 刪除文件對象 (S3 使用 deleteObject)
@@ -892,12 +893,12 @@ public class S3Util {
 	 */
 	public void removeFileIfPresent(String bucketName, String fileName) {
 		// 如果fileName 有值,則繼續刪除操作
-		if(StringUtils.isNotBlank(fileName)) {
+		if (StringUtils.isNotBlank(fileName)) {
 			this.deleteByKey(bucketName, fileName);
 		}
-		
+
 		// 如果fileName為null 或 空字串,什麼都不做,也不報錯
-		
+
 	}
 
 	/**
@@ -1080,18 +1081,24 @@ public class S3Util {
 					String relativePath = renameRules.getOrDefault(originalName,
 							originalName.substring(folderName.length() + 1));
 
+					// 唯一檔名
 					String uniquePath = this.resolveDuplicateName(relativePath, usedNames);
 					usedNames.add(uniquePath);
 
-					ZipEntry zipEntry = this.buildZipEntry(objectItem.getObjectName(), uniquePath, zipOut);
-					zipOut.putNextEntry(zipEntry);
+					// 只取檔名（給root目錄使用）
+					String rootPath = Paths.get(uniquePath).getFileName().toString();
 
-					// S3 Streaming 讀取
-					try (ResponseInputStream<GetObjectResponse> in = s3Client.getObject(
-							GetObjectRequest.builder().bucket(bucketName).key(objectItem.getObjectName()).build())) {
+					// 讀取buffer區
+					byte[] buffer = new byte[4096];
+					int bytesRead;
 
-						byte[] buffer = new byte[4096];
-						int bytesRead;
+					// S3 Streaming 讀取，Stream呼叫一次就會消失，所以得寫兩次
+					// 寫入 root 目錄
+					try (ResponseInputStream<GetObjectResponse> in = s3Client
+							.getObject(GetObjectRequest.builder().bucket(bucketName).key(originalName).build())) {
+
+						ZipEntry rootEntry = this.buildZipEntry(originalName, rootPath, zipOut);
+						zipOut.putNextEntry(rootEntry);
 
 						while ((bytesRead = in.read(buffer)) != -1) {
 							zipOut.write(buffer, 0, bytesRead);
@@ -1099,6 +1106,20 @@ public class S3Util {
 
 						zipOut.closeEntry();
 					}
+
+					//寫入 folder 結構
+					try (ResponseInputStream<GetObjectResponse> in = s3Client
+							.getObject(GetObjectRequest.builder().bucket(bucketName).key(originalName).build())) {
+
+						ZipEntry folderEntry = this.buildZipEntry(originalName, uniquePath, zipOut);
+						zipOut.putNextEntry(folderEntry);
+
+						while ((bytesRead = in.read(buffer)) != -1) {
+							zipOut.write(buffer, 0, bytesRead);
+						}
+						zipOut.closeEntry();
+					}
+
 				}
 
 			} catch (Exception e) {
@@ -1176,7 +1197,7 @@ public class S3Util {
 	 * @return
 	 */
 	public String normalizePath(String path) {
-		
+
 		if (path == null) {
 			throw new IllegalArgumentException("path 不能為 null");
 		}

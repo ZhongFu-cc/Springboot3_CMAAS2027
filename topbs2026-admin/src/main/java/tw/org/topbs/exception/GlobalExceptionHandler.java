@@ -5,6 +5,7 @@ import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -317,6 +318,21 @@ public class GlobalExceptionHandler {
 		log.error("Illegal argument: {}", ex.getMessage());
 		ex.printStackTrace();
 		return R.fail(400, ex.getMessage());
+	}
+	
+	
+	/**
+	 * 處理必要參數遺失異常
+	 * @param exception
+	 * @return
+	 */
+	@ResponseBody
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	@ExceptionHandler(value = MissingServletRequestParameterException.class)
+	public R<Map<String, Object>> missingServletRequestParameterHandler(MissingServletRequestParameterException exception) {
+		exception.printStackTrace();
+		log.error(exception.getMessage());
+		return R.fail(400, "請求格式錯誤，請檢查內容");
 	}
 
 	/**

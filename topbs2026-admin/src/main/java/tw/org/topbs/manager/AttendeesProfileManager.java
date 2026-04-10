@@ -308,7 +308,7 @@ public class AttendeesProfileManager {
 				int rowIndex = context.readRowHolder().getRowIndex() + 1;
 				result.setTotalCount(result.getTotalCount() + 1);
 
-				// 初始化attendeesId用來記錄,如果從excel中成功讀取就會友值
+				// 初始化attendeesId用來記錄,如果從excel中成功讀取就會有值
 				String attendeesId = "unknown";
 				if (row != null && row.getAttendeesId() != null) {
 					attendeesId = row.getAttendeesId().toString();

@@ -42,6 +42,7 @@ import tw.org.topbs.pojo.DTO.addEntityDTO.AddPaperReviewerDTO;
 import tw.org.topbs.pojo.DTO.addEntityDTO.AddTagToPaperReviewerDTO;
 import tw.org.topbs.pojo.DTO.putEntityDTO.PutPaperReviewerDTO;
 import tw.org.topbs.pojo.VO.PaperReviewerVO;
+import tw.org.topbs.pojo.VO.ReviewStatsVO;
 import tw.org.topbs.pojo.VO.ReviewVO;
 import tw.org.topbs.pojo.VO.ReviewerScoreStatsVO;
 import tw.org.topbs.pojo.entity.PaperAndPaperReviewer;
@@ -146,8 +147,8 @@ public class PaperReviewerController {
 			@RequestParam(required = false) @Schema(description = "不傳則預設一、二階段的資料都顯示，first_review 或者 second_review") String reviewStage) {
 		Page<ReviewerScoreStatsVO> pageable = new Page<ReviewerScoreStatsVO>(page, size);
 
-		IPage<ReviewerScoreStatsVO> reviewerScoreStatsVOPage = reviewerManager
-				.getReviewerScoreStatsVOPage(pageable, reviewStage);
+		IPage<ReviewerScoreStatsVO> reviewerScoreStatsVOPage = reviewerManager.getReviewerScoreStatsVOPage(pageable,
+				reviewStage);
 
 		return R.ok(reviewerScoreStatsVOPage);
 	}
@@ -229,6 +230,26 @@ public class PaperReviewerController {
 
 	}
 
+	@Operation(summary = "根據 審稿委員ID 和 審稿階段 獲得審稿統計資訊")
+	@SaCheckLogin(type = StpKit.PAPER_REVIEWER_TYPE)
+	@Parameters({
+			@Parameter(name = "Authorization-paper-reviewer", description = "請求頭token,token-value開頭必須為Bearer ", required = true, in = ParameterIn.HEADER), })
+	@GetMapping("review/stats")
+	public R<ReviewStatsVO> getReviewStatsVO(
+			@RequestParam @Schema(description = "first_review 或者 second_review") String reviewStage) {
+
+		// 判斷是否處於Enum 中的任何一個
+		ReviewStageEnum reviewStageEnum = ReviewStageEnum.fromValue(reviewStage);
+
+		// 從token 中取出審稿委員身分，
+		PaperReviewer paperReviewerInfo = paperReviewerService.getPaperReviewerInfo();
+
+		// 根據reviewerId 和 reviewStage 取得應審核的稿件
+		ReviewStatsVO reviewStatsVO = reviewerManager.getReviewStatsVOByReviewerIdAndReviewStage(paperReviewerInfo.getPaperReviewerId(), reviewStageEnum);
+
+		return R.ok(reviewStatsVO);
+	}
+
 	@Operation(summary = "根據 審稿委員ID 獲得應審核稿件(一、二階段通用)")
 	@SaCheckLogin(type = StpKit.PAPER_REVIEWER_TYPE)
 	@Parameters({
@@ -246,8 +267,9 @@ public class PaperReviewerController {
 		PaperReviewer paperReviewerInfo = paperReviewerService.getPaperReviewerInfo();
 
 		// 根據reviewerId 和 reviewStage 取得應審核的稿件
-		IPage<ReviewVO> reviewVOPage = reviewerManager.getReviewVOPageByReviewerIdAndReviewStage(pageable,paperReviewerInfo.getPaperReviewerId(),reviewStageEnum);
-		
+		IPage<ReviewVO> reviewVOPage = reviewerManager.getReviewVOPageByReviewerIdAndReviewStage(pageable,
+				paperReviewerInfo.getPaperReviewerId(), reviewStageEnum);
+
 		return R.ok(reviewVOPage);
 	}
 

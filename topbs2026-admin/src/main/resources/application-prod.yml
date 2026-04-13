@@ -274,9 +274,9 @@ project:
         staff: 0
       # 第一階段早鳥，外國人
       foreign:
-        member: 700
-        others: 600
-        non-member: 1000
+        member: 9600
+        others: 4800
+        non-member: 12800
         mvp: 0
         speaker: 0
         moderator: 0
@@ -294,9 +294,9 @@ project:
         staff: 0
       # 第二階段早鳥，外國人
       foreign:
-        member: 700
-        others: 600
-        non-member: 1000
+        member: 9600
+        others: 4800
+        non-member: 12800
         mvp: 0
         speaker: 0
         moderator: 0
@@ -314,9 +314,9 @@ project:
         staff: 0
       # 第三階段早鳥，外國人
       foreign:
-        member: 700
-        others: 600
-        non-member: 1000
+        member: 9600
+        others: 4800
+        non-member: 12800
         mvp: 0
         speaker: 0
         moderator: 0
@@ -334,9 +334,9 @@ project:
         staff: 0
       # 一般階段，外國人
       foreign:
-        member: 1000
-        others: 1200
-        non-member: 1500
+        member: 12800
+        others: 6400
+        non-member: 16000
         mvp: 0
         speaker: 0
         moderator: 0
@@ -354,9 +354,9 @@ project:
         staff: 0
       # 現場報名，外國人
       foreign:
-        member: 1500
-        others: 1800
-        non-member: 2000
+        member: 12800
+        others: 6400
+        non-member: 16000
         mvp: 0
         speaker: 0
         moderator: 0

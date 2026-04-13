@@ -5,11 +5,11 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
-public class PaperReviewerLoginInfo {
+public class MemberIdCardLogin {
 
 	@NotBlank
-	@Schema(description = "帳號")
-	private String account;
+	@Schema(description = "身分證字號")
+	private String idCard;
 
 	@NotBlank
 	@Schema(description = "密碼")

@@ -17,6 +17,7 @@ import tw.org.topbs.constants.I18nMessageKey;
 import tw.org.topbs.enums.ECpayRtnCodeEnum;
 import tw.org.topbs.enums.GroupRegistrationEnum;
 import tw.org.topbs.enums.OrderStatusEnum;
+import tw.org.topbs.enums.TagTypeEnum;
 import tw.org.topbs.exception.OrderPaymentException;
 import tw.org.topbs.exception.RegistrationClosedException;
 import tw.org.topbs.helper.MessageHelper;
@@ -30,6 +31,7 @@ import tw.org.topbs.pojo.entity.Setting;
 import tw.org.topbs.service.AttendeesService;
 import tw.org.topbs.service.AttendeesTagService;
 import tw.org.topbs.service.MemberService;
+import tw.org.topbs.service.MemberTagService;
 import tw.org.topbs.service.OrdersService;
 import tw.org.topbs.service.PaymentService;
 import tw.org.topbs.service.SettingService;
@@ -52,6 +54,7 @@ public class OrderPaymentManager {
 	private final MessageHelper messageHelper;
 	private final TagAssignmentHelper tagAssignmentHelper;
 	private final MemberService memberService;
+	private final MemberTagService memberTagService;
 	private final OrdersService ordersService;
 	private final PaymentService paymentService;
 	private final AttendeesService attendeesService;
@@ -199,13 +202,15 @@ public class OrderPaymentManager {
 
 				// 4-2 付款完成，所以將他新增進 與會者名單
 				Attendees attendees = attendeesService.addAttendees(member);
-				
+
 				// 4-3.獲取當下與會者群體的Index,進行與會者標籤分組
-				tagAssignmentHelper.assignTag(attendees.getAttendeesId(),
-						attendeesService::getAttendeesGroupIndex,
-						tagService::getOrCreateAttendeesGroupTag,
-						attendeesTagService::addAttendeesTag);
-				
+				tagAssignmentHelper.assignTag(attendees.getAttendeesId(), attendeesService::getAttendeesGroupIndex,
+						tagService::getOrCreateAttendeesGroupTag, attendeesTagService::addAttendeesTag);
+
+				// 4-4.移除會員 註冊費未付款 Tag
+				tagAssignmentHelper.removeGroupTagsByPattern(member.getMemberId(), TagTypeEnum.MEMBER.getType(),
+						"註冊費未付款", tagService::getTagIdsByTypeAndNamePattern, memberTagService::removeTagsFromMember);
+
 			}
 
 			// 5.付款失敗，更新訂單的付款狀態
@@ -236,11 +241,9 @@ public class OrderPaymentManager {
 					// 4-2 付款完成，所以將他新增進 與會者名單
 					Attendees attendees = attendeesService.addAttendees(slaveMember);
 					// 4-3.獲取當下與會者群體的Index,進行與會者標籤分組
-					tagAssignmentHelper.assignTag(attendees.getAttendeesId(),
-							attendeesService::getAttendeesGroupIndex,
-							tagService::getOrCreateAttendeesGroupTag,
-							attendeesTagService::addAttendeesTag);
-					
+					tagAssignmentHelper.assignTag(attendees.getAttendeesId(), attendeesService::getAttendeesGroupIndex,
+							tagService::getOrCreateAttendeesGroupTag, attendeesTagService::addAttendeesTag);
+
 				}
 
 			}

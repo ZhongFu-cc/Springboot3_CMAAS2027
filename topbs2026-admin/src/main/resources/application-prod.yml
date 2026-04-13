@@ -221,25 +221,25 @@ minio:
 # 自定義，專案相關
 project:
   # 專案域名
-  domain: https://ticbcs.org.tw
+  domain: https://tobss.org.tw
   # 活動名稱
   name: TOPBS 2026
   # 活動名稱縮寫/別名
   alias: topbs2026
   # 語言，可選值zh_TW / en ，用於選擇中文信zh_TW 或 英文信en
-  language: zh_TW
+  language: en
   # Banner 圖片
-  banner-url: https://tobss.org.tw/_nuxt/banner.CL2lyu9P.png
+  banner-url: https://tobss.org.tw/_nuxt/260310-home-banner.Djhj-gRq.jpg
   # 群組相關，與一次寄送 email 數量有關
   group-size: 200
   # 報名模式，可選值: FREE / PREPAID / POSTPAID ，POSTPAID尚未實現
-  mode: FREE
+  mode: POSTPAID
 
   # email 相關
   email:
     # 寄件人信箱 (自定義domain 需搭配 spring.mail.* 使用 + brevo STMP ,才有效果)
     # Gmail的話可以直接填進from , 讓寄信和收信的信箱相同
-    from: notify@ticbcs.org.tw
+    from: notify@tobss.org.tw
     # 寄件人顯示名稱
     from-name: TOPBS 2026 Notification
     # 回覆信箱
@@ -274,9 +274,9 @@ project:
         staff: 0
       # 第一階段早鳥，外國人
       foreign:
-        member: 9600
-        others: 4800
-        non-member: 12800
+        member: 700
+        others: 600
+        non-member: 1000
         mvp: 0
         speaker: 0
         moderator: 0
@@ -294,9 +294,9 @@ project:
         staff: 0
       # 第二階段早鳥，外國人
       foreign:
-        member: 9600
-        others: 4800
-        non-member: 12800
+        member: 700
+        others: 600
+        non-member: 1000
         mvp: 0
         speaker: 0
         moderator: 0
@@ -314,9 +314,9 @@ project:
         staff: 0
       # 第三階段早鳥，外國人
       foreign:
-        member: 9600
-        others: 4800
-        non-member: 12800
+        member: 700
+        others: 600
+        non-member: 1000
         mvp: 0
         speaker: 0
         moderator: 0
@@ -334,9 +334,9 @@ project:
         staff: 0
       # 一般階段，外國人
       foreign:
-        member: 12800
-        others: 6400
-        non-member: 16000
+        member: 1000
+        others: 1200
+        non-member: 1500
         mvp: 0
         speaker: 0
         moderator: 0
@@ -354,9 +354,9 @@ project:
         staff: 0
       # 現場報名，外國人
       foreign:
-        member: 12800
-        others: 6400
-        non-member: 16000
+        member: 1500
+        others: 1800
+        non-member: 2000
         mvp: 0
         speaker: 0
         moderator: 0

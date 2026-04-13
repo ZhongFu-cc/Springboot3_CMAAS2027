@@ -13,13 +13,16 @@ import tw.org.topbs.enums.OrderStatusEnum;
 import tw.org.topbs.enums.RegistrationPhaseEnum;
 import tw.org.topbs.exception.PaperClosedException;
 import tw.org.topbs.helper.MessageHelper;
+import tw.org.topbs.helper.TagAssignmentHelper;
 import tw.org.topbs.pojo.DTO.EmailBodyContent;
 import tw.org.topbs.pojo.entity.Member;
 import tw.org.topbs.pojo.entity.Orders;
 import tw.org.topbs.service.AsyncService;
+import tw.org.topbs.service.MemberTagService;
 import tw.org.topbs.service.NotificationService;
 import tw.org.topbs.service.OrdersService;
 import tw.org.topbs.service.SettingService;
+import tw.org.topbs.service.TagService;
 import tw.org.topbs.utils.CountryUtil;
 
 @Component
@@ -35,9 +38,12 @@ public class PrepaidModeStrategy implements ProjectModeStrategy {
 	@Value("${project.group-size}")
 	private int GROUP_SIZE;
 
-	private RegistrationFeeConfig registrationFeeConfig;
+	private final RegistrationFeeConfig registrationFeeConfig;
 
 	private final MessageHelper messageHelper;
+	private final TagAssignmentHelper tagAssignmentHelper;
+	private final MemberTagService memberTagService;
+	private final TagService tagService;
 	private final OrdersService ordersService;
 	private final SettingService settingService;
 	private final NotificationService notificationService;
@@ -65,14 +71,15 @@ public class PrepaidModeStrategy implements ProjectModeStrategy {
 				memberCategoryEnum.getConfigKey());
 
 		// 5.如果註冊費金額為0 , 創建免費註冊費訂單 , 會自動為繳費完畢的情況
-		if( membershipFee.compareTo(BigDecimal.ZERO) == 0 ) {
+		if (membershipFee.compareTo(BigDecimal.ZERO) == 0) {
 			ordersService.createFreeRegistrationOrder(member);
-		}else {
+		} else {
 			// 創建付費註冊費訂單
 			ordersService.createRegistrationOrder(membershipFee, member);
+			// 獲取當下「未付款」的Member群體的Index，賦予「未繳費」標籤
+			tagAssignmentHelper.assignTag(member.getMemberId(), ordersService::getNotPaidRegistrationOrderGroupIndex,
+					tagService::getOrCreateNotPaidGroupTag, memberTagService::addMemberTag);
 		}
-		
-
 
 		// 6.創建註冊成功通知信件內容
 		EmailBodyContent registrationSuccessContent = notificationService.generateRegistrationSuccessContent(member,

@@ -1,10 +1,10 @@
 package tw.org.topbs.service.impl;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
 
-import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +36,10 @@ public class AsyncServiceImpl implements AsyncService {
 	private final JavaMailSender mailSender;
 	private final ScheduleEmailRecordService scheduleEmailRecordService;
 	private final S3Util s3Util;
+	
+	// 「預設」存储桶名称
+	@Value("${spring.cloud.aws.s3.bucketName}") // 注意：这里的 Value key 可能需要对应您的配置
+	private String bucketName;
 
 	@Value("${project.email.from}")
 	private String EMAIL_FROM;
@@ -47,125 +50,117 @@ public class AsyncServiceImpl implements AsyncService {
 	@Value("${project.email.reply-to}")
 	private String EMAIL_REPLY_TO;
 
+
 	@Override
 	@Async("taskExecutor")
 	public void sendCommonEmail(String to, String subject, String htmlContent, String plainTextContent) {
-		// 開始編寫信件,準備寄送單封郵件給會員
-		try {
-			MimeMessage message = mailSender.createMimeMessage();
-			// message.setHeader("Content-Type", "text/html; charset=UTF-8");
-			
-	        // 🔥 關鍵：設定信件為「高重要性」
-	        message.addHeader("X-Priority", "1");         // 1 = High, 3 = Normal, 5 = Low
-	        message.addHeader("Importance", "High");      // Outlook / Exchange 會識別
-	        message.addHeader("Priority", "urgent");      // 部分郵件用戶端使用這個標頭
-
-			MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
-			// 當使用SMTP中繼時,可以在SPF + DKIM + DMARC 驗證通過的domain 使用自己的domain
-			// 可以跟brevo 的 smtp Server不一樣
-			try {
-				helper.setFrom(EMAIL_FROM, EMAIL_FROM_NAME);
-			} catch (UnsupportedEncodingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			// 指定回信信箱
-			helper.setReplyTo(EMAIL_REPLY_TO);
-
-			helper.setTo(to);
-			helper.setSubject(subject);
-			//			helper.setText(plainTextContent, false); // 纯文本版本
-			//			helper.setText(htmlContent, true); // HTML 版本
-
-			helper.setText(plainTextContent, htmlContent);
-
-			mailSender.send(message);
-
-		} catch (MessagingException e) {
-			System.err.println("發送郵件失敗: " + e.getMessage());
-			log.error("發送郵件失敗: " + e.getMessage());
-		}
+		sendCommonEmail(to, subject, htmlContent, plainTextContent, null);
 	}
 
 	@Override
 	@Async("taskExecutor")
 	public void sendCommonEmail(String to, String subject, String htmlContent, String plainTextContent,
 			List<ByteArrayResource> attachments) {
-		try {
+		String[] recipients = parseEmailAddresses(to);
+		sendInternal(recipients, subject, htmlContent, plainTextContent, attachments);
+	}
 
+	@Override
+	@Async("taskExecutor")
+	public void sendCommonEmail(List<String> to, String subject, String htmlContent, String plainTextContent) {
+		// 呼叫處理 List 的版本
+		String[] recipients = parseEmailAddresses(to);
+		// 呼叫共同邏輯
+		sendInternal(recipients, subject, htmlContent, plainTextContent, null);
+	}
+
+	@Override
+	@Async("taskExecutor")
+	public void sendCommonEmail(List<String> to, String subject, String htmlContent, String plainTextContent,
+			List<ByteArrayResource> attachments) {
+		// 呼叫處理 List 的版本
+		String[] recipients = parseEmailAddresses(to);
+		// 呼叫共同邏輯
+		sendInternal(recipients, subject, htmlContent, plainTextContent, attachments);
+	}
+
+
+	/**
+	 * 私有方法,核心寄信業務
+	 * 
+	 * @param recipients
+	 * @param subject
+	 * @param htmlContent
+	 * @param plainTextContent
+	 * @param attachments
+	 */
+	private void sendInternal(String[] recipients, String subject, String htmlContent, String plainTextContent,
+			List<ByteArrayResource> attachments) {
+		if (recipients.length == 0) {
+			log.warn("收件人列表為空，取消發送。");
+			return;
+		}
+
+		try {
 			MimeMessage message = mailSender.createMimeMessage();
-			
-	        // 🔥 關鍵：設定信件為「高重要性」
-	        message.addHeader("X-Priority", "1");         // 1 = High, 3 = Normal, 5 = Low
-	        message.addHeader("Importance", "High");      // Outlook / Exchange 會識別
-	        message.addHeader("Priority", "urgent");      // 部分郵件用戶端使用這個標頭
-			
+			// 🔥 關鍵：設定信件為「高重要性」
+			message.addHeader("X-Priority", "1"); // 1 = High, 3 = Normal, 5 = Low
+			message.addHeader("Importance", "High"); // Outlook / Exchange 會識別
+			message.addHeader("Priority", "urgent"); // 部分郵件用戶端使用這個標頭
+
 			MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-			// 處理多個收件人地址
-			String[] recipients = parseEmailAddresses(to);
-
-			// 當使用SMTP中繼時,可以在SPF + DKIM + DMARC 驗證通過的domain 使用自己的domain
-			// 可以跟brevo 的 smtp Server不一樣
-			try {
-				helper.setFrom(EMAIL_FROM, EMAIL_FROM_NAME);
-			} catch (UnsupportedEncodingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-
-			// 指定回信信箱
-			helper.setReplyTo(EMAIL_REPLY_TO);
-
+			// MimeMessageHelper 支援 String[]
 			helper.setTo(recipients);
-
-			//			helper.setTo(to);
-
+			helper.setFrom(EMAIL_FROM, EMAIL_FROM_NAME);
+			helper.setReplyTo(EMAIL_REPLY_TO);
 			helper.setSubject(subject);
-			//			helper.setText(plainTextContent, false); // 純文本版本
-			//			helper.setText(htmlContent, true); // HTML 版本
 			helper.setText(plainTextContent, htmlContent);
 
-			// 添加附件
-			if (attachments != null && !(attachments.isEmpty())) {
-				for (ByteArrayResource attachment : attachments) {
-					helper.addAttachment(attachment.getFilename(), attachment);
-
+			// 有附件就新增附件
+			if (attachments != null) {
+				for (ByteArrayResource file : attachments) {
+					helper.addAttachment(file.getFilename(), file);
 				}
 			}
 
 			mailSender.send(message);
-
-		} catch (MessagingException e) {
+		} catch (Exception e) {
 			System.err.println("發送郵件失敗: " + e.getMessage());
-			log.error("發送郵件失敗: " + e.getMessage());
+			log.error("發送郵件失敗", e);
 		}
 	}
 
 	/**
-	 * 解析郵件地址字串，支援單個地址或逗號分隔的多個地址
-	 * 
-	 * @param emailString 郵件地址字串
-	 * @return 郵件地址陣列
+	 * 私有方法
+	 * 將傳入的單一字串（可能包含多個信箱）拆解成陣列
+	 * 支援逗號 (,) 或分號 (;) 分隔
 	 */
-	private String[] parseEmailAddresses(String emailString) {
-		if (emailString == null || emailString.trim().isEmpty()) {
-			throw new IllegalArgumentException("郵件地址不能為空");
+	private String[] parseEmailAddresses(String to) {
+		if (to == null || to.isBlank()) {
+			return new String[0];
 		}
-
-		// 移除首尾空白並按逗號分割
-		String[] addresses = emailString.trim().split(",");
-
-		// 清理每個地址的空白字符並驗證
-		for (int i = 0; i < addresses.length; i++) {
-			addresses[i] = addresses[i].trim();
-		}
-
-		return addresses;
+		// 使用正則表達式拆分，並去除多餘空格
+		return Arrays.stream(to.split("[,;]"))
+				.map(String::trim)
+				.filter(email -> !email.isEmpty())
+				.toArray(String[]::new);
 	}
 
-	
+	/**
+	 * 私有方法，重載
+	 * 處理 List<String>（同樣支援元素內包含逗號、分號的情況）
+	 */
+	private String[] parseEmailAddresses(List<String> to) {
+		if (to == null || to.isEmpty()) {
+			return new String[0];
+		}
+		return to.stream()
+				.filter(Objects::nonNull)
+				// 核心重點：將每個元素丟進上面的 String 版本處理，再扁平化 (flatMap)
+				.flatMap(s -> Arrays.stream(this.parseEmailAddresses(s)))
+				.toArray(String[]::new);
+	}
 
 	@Override
 	@Async("taskExecutor")
@@ -220,7 +215,7 @@ public class AsyncServiceImpl implements AsyncService {
 				String email = sendEmailDTO.getIsTest() ? sendEmailDTO.getTestEmail() : emailExtractor.apply(recipient);
 
 				// 3. 查詢附件（判斷是否需要附件）
-				List<ByteArrayResource> attachments = Collections.emptyList();
+				List<ByteArrayResource> attachments = new ArrayList<>();
 				if (sendEmailDTO.getIncludeOfficialAttachment() && attachmentProvider != null) {
 					attachments = attachmentProvider.apply(recipient);
 				}
@@ -278,8 +273,10 @@ public class AsyncServiceImpl implements AsyncService {
 					// 將檔案列表遍歷拿到真正的檔案
 					for (String path : paths) {
 
+						String s3Key = s3Util.extractS3PathInDbUrl(bucketName, path);
+						
 						// 獲取檔案位元組
-						byte[] fileBytes = s3Util.getFileBytes(path);
+						byte[] fileBytes = s3Util.getFileBytes(s3Key);
 
 						if (fileBytes != null) {
 							// 解析檔名
@@ -301,9 +298,9 @@ public class AsyncServiceImpl implements AsyncService {
 					scheduleEmailRecord.setStatus(ScheduleEmailStatus.EXECUTE.getValue());
 					scheduleEmailRecordService.updateById(scheduleEmailRecord);
 
-//					System.out.println("模擬寄信,等其他測試完成就打開它");
+					//					System.out.println("模擬寄信,等其他測試完成就打開它");
 					this.sendCommonEmail(scheduleEmailRecord.getEmail(), scheduleEmailTask.getSubject(),
-					scheduleEmailRecord.getHtmlContent(), scheduleEmailRecord.getPlainText(), attachments);
+							scheduleEmailRecord.getHtmlContent(), scheduleEmailRecord.getPlainText(), attachments);
 
 					scheduleEmailRecord.setStatus(ScheduleEmailStatus.FINISHED.getValue());
 

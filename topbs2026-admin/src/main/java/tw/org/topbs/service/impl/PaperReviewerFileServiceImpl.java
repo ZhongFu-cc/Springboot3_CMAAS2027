@@ -46,10 +46,10 @@ public class PaperReviewerFileServiceImpl extends ServiceImpl<PaperReviewerFileM
 	private static final long MAX_THREE_FILES_TOTAL_SIZE = 20 * 1000 * 1000;
 
 	// 公文附件基本路徑
-	private final String BASE_PATH = "paper-reviewer/offical/";
+	private final String BASE_PATH = "paper-reviewer/official/";
 
 	// 檔案類型
-	private final String OFFICAL_DOCUMENT = "offical-document";
+	private final String OFFICIAL_DOCUMENT = "official-document";
 
 	@Override
 	public List<PaperReviewerFile> getReviewerFilesByReviewerId(Long reviewerId) {
@@ -104,7 +104,7 @@ public class PaperReviewerFileServiceImpl extends ServiceImpl<PaperReviewerFileM
 		PaperReviewerFile paperReviewerFile = new PaperReviewerFile();
 		paperReviewerFile.setPaperReviewerId(paperReviewerId);
 		paperReviewerFile.setFileName(file.getOriginalFilename());
-		paperReviewerFile.setType(OFFICAL_DOCUMENT);
+		paperReviewerFile.setType(OFFICIAL_DOCUMENT);
 
 		// 4.上傳檔案至S3,獲取回傳的完整URL路徑
 		String dbUrl = s3Util.upload(BASE_PATH, file.getOriginalFilename(), file);

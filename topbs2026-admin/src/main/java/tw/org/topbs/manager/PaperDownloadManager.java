@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -23,11 +24,14 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import tw.org.topbs.constants.PaperFileConstants;
 import tw.org.topbs.convert.PaperConvert;
+import tw.org.topbs.enums.OrderStatusEnum;
 import tw.org.topbs.enums.ReviewStageEnum;
+import tw.org.topbs.pojo.entity.Orders;
 import tw.org.topbs.pojo.entity.Paper;
 import tw.org.topbs.pojo.entity.PaperAndPaperReviewer;
 import tw.org.topbs.pojo.entity.PaperFileUpload;
 import tw.org.topbs.pojo.excelPojo.PaperScoreExcel;
+import tw.org.topbs.service.OrdersService;
 import tw.org.topbs.service.PaperAndPaperReviewerService;
 import tw.org.topbs.service.PaperFileUploadService;
 import tw.org.topbs.service.PaperService;
@@ -45,6 +49,7 @@ public class PaperDownloadManager {
 	@Value("${spring.cloud.aws.s3.bucketName}")
 	private String bucketName;
 
+	private final OrdersService ordersService;
 	private final PaperService paperService;
 	private final PaperFileUploadService paperFileUploadService;
 	private final PaperAndPaperReviewerService paperAndPaperReviewerService;
@@ -76,11 +81,17 @@ public class PaperDownloadManager {
 		// 2.查詢所有稿件
 		List<Paper> paperList = paperService.getPapersEfficiently();
 
-		// 3.獲得以paperId為key , 關聯紀錄List的映射對象
+		// 3.抽取memberIds , 為了之後拿取繳費狀態
+		Set<Long> memberIds = paperList.stream().map(Paper::getMemberId).collect(Collectors.toSet());
+
+		// 4.獲得以paperId為key , 關聯紀錄List的映射對象
 		Map<Long, List<PaperAndPaperReviewer>> paperReviewersMap = paperAndPaperReviewerService
 				.groupPaperReviewersByPaperId(reviewStage);
 
-		// 4.開始遍歷並組裝成Excel對象
+		// 5. 拿到memberId 與 註冊費訂單的映射
+		Map<Long, Orders> registrationOrderMapByMemberId = ordersService.getRegistrationOrderMapByMemberId(memberIds);
+
+		// 6.開始遍歷並組裝成Excel對象
 		List<PaperScoreExcel> excelData = paperList.stream().map(paper -> {
 
 			PaperScoreExcel paperScoreExcel = paperConvert.entityToExcel(paper);
@@ -117,6 +128,11 @@ public class PaperDownloadManager {
 					.average() // 計算平均值，回傳 OptionalDouble
 					.orElse(0.0); // 如果沒有分數，預設為 0.0
 			paperScoreExcel.setAverageScore(averageScore);
+
+			// 拿到會員繳費狀態塞進vo
+			Orders orders = registrationOrderMapByMemberId.get(paper.getMemberId());
+			OrderStatusEnum orderStatusEnum = OrderStatusEnum.fromValue(orders.getStatus());
+			paperScoreExcel.setMemberPaymentStatus(orderStatusEnum.getLabelZh());
 
 			return paperScoreExcel;
 
@@ -200,18 +216,49 @@ public class PaperDownloadManager {
 		String s3Key = s3Util.extractS3PathInDbUrl(bucketName, fullPath);
 		String ext = s3Util.getFileExtension(s3Key);
 
+		// 處理檔名
 		String newFileName;
+		// 如果有發表編號
 		if (StringUtils.isNotBlank(paper.getPublicationNumber())) {
 			newFileName = paper.getPublicationNumber() + "_" + speaker + ext;
 		} else {
+			// 沒有發表編號則用流水號
 			String seqStr = String.format("%03d", paper.getSequenceNo());
 			newFileName = seqStr + "_" + speaker + ext;
 		}
 
+		// 處理檔案路徑
 		int lastSlash = s3Key.lastIndexOf('/');
 		String folderPath = lastSlash != -1 ? s3Key.substring(0, lastSlash + 1) : "";
 
-		renameRules.put(s3Key, folderPath + newFileName);
+		String newPath;
+
+		if (folderPath.startsWith(PaperFileConstants.SLIDE_BASE_PATH)) {
+			String publicationGroup = paper.getPublicationGroup();
+
+			// 取出 second-stage 之後的子路徑，例如/Poster Presentation/pdf
+			String subPath = folderPath.substring(PaperFileConstants.SLIDE_BASE_PATH.length());
+
+			StringBuilder pathBuilder = new StringBuilder(PaperFileConstants.SLIDE_BASE_PATH);
+
+			if (StringUtils.isNotBlank(publicationGroup)) {
+				// 有 → 覆蓋原本分類
+				pathBuilder.append("/").append(publicationGroup);
+			} else {
+				// 沒有 → 保留原本分類
+				pathBuilder.append(subPath);
+			}
+
+			pathBuilder.append("/").append(newFileName);
+			newPath = pathBuilder.toString();
+		} else {
+			// 這邊處理非二階段的稿件path , 不處理也沒差 , 不會用到
+			newPath = folderPath + newFileName;
+		}
+
+		System.out.println("slide組裝後的newPath: " + newPath);
+
+		renameRules.put(s3Key, newPath);
 	}
 
 	/**

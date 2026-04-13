@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
@@ -257,7 +259,7 @@ public class PaperManager {
 			// 3-1資料轉換
 			PaperVO paperVO = paperConvert.entityToVO(paper);
 			// 3-2塞入附件
-			paperVO.setPaperFileUpload(filesMapByPaperId.getOrDefault(filesMapByPaperId, Collections.emptyList()));
+			paperVO.setPaperFileUpload(filesMapByPaperId.getOrDefault(paperVO.getPaperId(), Collections.emptyList()));
 
 			return paperVO;
 		}).toList();
@@ -292,13 +294,18 @@ public class PaperManager {
 		// 5.新增稿件附件，拿到要放進信件中的PDF檔案
 		List<ByteArrayResource> paperPDFFiles = paperFileUploadService.addPaperFileUpload(paper, files);
 
-		// 6.獲取當下與會者群體的Index,進行與會者標籤分組
+		// 6.獲取當下 投稿者 群體的Index,進行 投稿者 標籤分組
 		tagAssignmentHelper.assignTag(paper.getPaperId(), paperService::getPaperGroupIndex,
-				tagService::getOrCreateAttendeesGroupTag, paperTagService::addPaperTag);
+				tagService::getOrCreatePaperGroupTag, paperTagService::addPaperTag);
 
-		// 7.產生通知信件，並寄出給通訊作者
+		// 7.使用 Stream 組裝 Email List，並過濾掉 null、空字串以及重複的 Email
+		List<String> recipients = Stream.of(paper.getSpeakerEmail(), paper.getCorrespondingAuthorEmail())
+				.filter(email -> email != null && !email.trim().isEmpty())
+				.collect(Collectors.toList());
+
+		// 8.產生通知信件，並寄出給主講者 和 通訊作者
 		EmailBodyContent abstractSuccessContent = notificationService.generateAbstractSuccessContent(paper);
-		asyncService.sendCommonEmail(paper.getCorrespondingAuthorEmail(), "Abstract Submission Confirmation",
+		asyncService.sendCommonEmail(recipients, "Abstract Submission Confirmation",
 				abstractSuccessContent.getHtmlContent(), abstractSuccessContent.getPlainTextContent(), paperPDFFiles);
 
 	}
@@ -392,7 +399,8 @@ public class PaperManager {
 
 			// 3. 狀態轉換校驗
 			if (!this.isValidStatusTransition(oldPaper.getStatus(), dto.getStatus())) {
-				return "不合規的狀態轉換: " + oldPaper.getStatus() + " -> " + dto.getStatus();
+				return "不合規的狀態轉換: " + PaperStatusEnum.fromValue(oldPaper.getStatus()).getLabelZh() + " -> "
+						+ PaperStatusEnum.fromValue(dto.getStatus()).getLabelZh();
 			}
 
 			// 4. 合法轉換：更新資料並處理標籤

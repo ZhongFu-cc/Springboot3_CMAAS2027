@@ -32,7 +32,7 @@ public interface PaymentConvert {
 	@Mapping(target = "platformId", source = "platformID")
 	@Mapping(target = "simulatePaid", source = "simulatePaid")
 	@Mapping(target = "checkMacValue", source = "checkMacValue")
-	Payment officalDataToEntity(ECPayResponseDTO ecPayResponseDTO);
+	Payment officialDataToEntity(ECPayResponseDTO ecPayResponseDTO);
 
 	Payment addDTOToEntity(AddPaymentDTO addPaymentDTO);
 

@@ -62,8 +62,8 @@ public class PaymentServiceImpl extends ServiceImpl<PaymentMapper, Payment> impl
 
 	@Override
 	public Payment addPayment(ECPayResponseDTO ECPayResponseDTO) {
-		// 1.轉換綠界金流offical Data 轉換 自己這邊的Entity
-		Payment payment = paymentConvert.officalDataToEntity(ECPayResponseDTO);
+		// 1.轉換綠界金流official Data 轉換 自己這邊的Entity
+		Payment payment = paymentConvert.officialDataToEntity(ECPayResponseDTO);
 		log.info("綠界金流回傳付款確認後資料：　" + payment);
 
 		// 2.新增響應回來的交易紀錄

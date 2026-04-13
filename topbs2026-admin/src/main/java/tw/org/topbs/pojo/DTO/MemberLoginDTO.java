@@ -5,11 +5,13 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
-public class MemberLoginInfo {
+public class MemberLoginDTO {
 
-	@Schema(description = "主要信箱")
-	private String email;
+	@NotBlank
+	@Schema(description = "外國人使用「信箱」，台灣人使用「身分證字號」")
+	private String account;
 
+	@NotBlank
 	@Schema(description = "密碼")
 	private String password;
 	

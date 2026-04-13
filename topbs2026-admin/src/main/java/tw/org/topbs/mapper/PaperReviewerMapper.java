@@ -18,7 +18,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  */
 public interface PaperReviewerMapper extends BaseMapper<PaperReviewer> {
 
-	@Select("SELECT * FROM paper-reviewer WHERE is_deleted = 0")
+	@Select("SELECT * FROM paper_reviewer WHERE is_deleted = 0")
 	List<PaperReviewer> selectReviewers();
 	
 }

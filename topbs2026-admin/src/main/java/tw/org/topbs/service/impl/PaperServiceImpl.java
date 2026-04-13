@@ -22,6 +22,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import tw.org.topbs.constants.I18nMessageKey;
 import tw.org.topbs.convert.PaperConvert;
+import tw.org.topbs.enums.PaperStatusEnum;
+import tw.org.topbs.enums.ReviewStageEnum;
 import tw.org.topbs.exception.PaperAbstractsException;
 import tw.org.topbs.helper.MessageHelper;
 import tw.org.topbs.mapper.PaperMapper;
@@ -88,7 +90,7 @@ public class PaperServiceImpl extends ServiceImpl<PaperMapper, Paper> implements
 			throw new PaperAbstractsException(messageHelper.get(I18nMessageKey.Paper.NO_MATCH));
 		}
 	}
-	
+
 	@Override
 	public Paper getPaperByOwner(Long paperId, Long memberId) {
 		LambdaQueryWrapper<Paper> paperQueryWrapper = new LambdaQueryWrapper<>();
@@ -116,6 +118,18 @@ public class PaperServiceImpl extends ServiceImpl<PaperMapper, Paper> implements
 	}
 
 	@Override
+	public List<Paper> getPapersByReviewStage(ReviewStageEnum reviewStageEnum) {
+		return switch (reviewStageEnum) {
+		// 一階段審核，找出所有「未審核」的稿件
+		case FIRST_REVIEW -> baseMapper.selectPapersByStatus(PaperStatusEnum.UNREVIEWED.getValue());
+		// 二階段審核，找出所有「通過一階段」的稿件
+		case SECOND_REVIEW -> baseMapper.selectPapersByStatus(PaperStatusEnum.ACCEPTED.getValue());
+		// 沒有匹配到狀況，返回空列表
+		default -> Collections.emptyList();
+		};
+	}
+
+	@Override
 	public List<Paper> getPaperListByIds(Collection<Long> paperIds) {
 		if (paperIds.isEmpty()) {
 			return Collections.emptyList();
@@ -129,8 +143,6 @@ public class PaperServiceImpl extends ServiceImpl<PaperMapper, Paper> implements
 		paperQueryWrapper.eq(Paper::getMemberId, memberId);
 		return baseMapper.selectList(paperQueryWrapper);
 	}
-
-
 
 	@Override
 	public IPage<Paper> getPaperPageByQuery(Page<Paper> pageable, String queryText, Integer status, String absType,
@@ -152,7 +164,9 @@ public class PaperServiceImpl extends ServiceImpl<PaperMapper, Paper> implements
 								.or()
 								.like(Paper::getCorrespondingAuthorPhone, queryText)
 								.or()
-								.like(Paper::getCorrespondingAuthorEmail, queryText));
+								.like(Paper::getCorrespondingAuthorEmail, queryText)
+								.or()
+								.like(Paper::getSpeakerEmail,queryText));
 
 		return baseMapper.selectPage(pageable, paperQueryWrapper);
 	}
@@ -246,6 +260,5 @@ public class PaperServiceImpl extends ServiceImpl<PaperMapper, Paper> implements
 		return paperFileUploadService.getSecondStagePaperFilesByPaperId(paperId);
 
 	}
-
 
 }

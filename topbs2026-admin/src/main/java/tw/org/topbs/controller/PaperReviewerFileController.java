@@ -56,8 +56,9 @@ public class PaperReviewerFileController {
 			+ "請用 http://localhost:8080/swagger-ui/index.html 測試 ")
 	@SaCheckRole("super-admin")
 	public R<PaperReviewerFile> savePaperReviewerFile(@RequestPart("file") @NotNull @Valid MultipartFile file,
-			@RequestPart("paperReviewerId") @NotNull @Valid Long paperReviewerId) {
-		paperReviewerFileService.addPaperReviewerFile(file, paperReviewerId);
+			@RequestPart("paperReviewerId") @NotNull @Valid String paperReviewerId) {
+		Long value = Long.valueOf(paperReviewerId);
+		paperReviewerFileService.addPaperReviewerFile(file, value);
 		return R.ok();
 	}
 

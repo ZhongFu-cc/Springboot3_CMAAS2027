@@ -1,6 +1,8 @@
 package tw.org.topbs.service.impl;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 import org.springframework.stereotype.Service;
 
@@ -68,7 +70,7 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting> impl
 	 */
 	private RegistrationPhaseEnum resolvePhase(LocalDateTime time) {
 		Setting setting = this.getSetting();
-		
+
 		// 如果拿不到setting 則返回一般報名費用
 		if (setting == null) {
 			return RegistrationPhaseEnum.REGULAR;
@@ -92,13 +94,14 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting> impl
 			return RegistrationPhaseEnum.PHASE_THREE;
 		}
 
-		// 如果有設置最後註冊時間(通常都有)，且當下時間符合 早鳥優惠結束 ~ 現場報名前 , 則返回REGULAR
-		// 「沒有」設置會直接為false進入下一個判斷
-		if (isInPhase(time, setting.getLastRegistrationTime())) {
-			return RegistrationPhaseEnum.REGULAR;
+		// 如果時間位於活動日，則套用現場繳費的金額
+		if (isDuringTheEvent(time, setting.getEventStartDate(), setting.getEventEndDate())) {
+			return RegistrationPhaseEnum.ON_SITE;
 		}
 
-		return RegistrationPhaseEnum.ON_SITE;
+		// 如果前面判斷都不符合，基本上就處於早鳥優惠結束 ~ 現場報名前 , 則返回REGULAR
+		return RegistrationPhaseEnum.REGULAR;
+
 	}
 
 	/**
@@ -110,6 +113,20 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting> impl
 	 */
 	private boolean isInPhase(LocalDateTime time, LocalDateTime deadline) {
 		return deadline != null && (time.isBefore(deadline) || time.isEqual(deadline));
+	}
+
+	/**
+	 * 判斷是否處於活動時間
+	 * 
+	 * @param targetTime     目標時間
+	 * @param eventStartDate 活動起始日
+	 * @param eventEndDate   活動結束日
+	 * @return
+	 */
+	private boolean isDuringTheEvent(LocalDateTime targetTime, LocalDate eventStartDate, LocalDate eventEndDate) {
+		LocalDateTime startDateTime = eventStartDate.atStartOfDay(); // 當天 00:00:00
+		LocalDateTime endDateTime = eventEndDate.atTime(LocalTime.MAX); // 當天 23:59:59.999999999
+		return !targetTime.isBefore(startDateTime) && !targetTime.isAfter(endDateTime);
 	}
 
 	@Override

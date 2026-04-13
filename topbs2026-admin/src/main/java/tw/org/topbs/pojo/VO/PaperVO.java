@@ -20,6 +20,9 @@ public class PaperVO {
 
 	@Schema(description = "會員ID")
 	private Long memberId;
+	
+	@Schema(description = "報告方式")
+	private String presentationType;
 
 	@Schema(description = "投稿類別")
 	private String absType;
@@ -39,6 +42,9 @@ public class PaperVO {
 	
 	@Schema(description = "主講者")
 	private String speaker;
+	
+	@Schema(description = "主講者信箱")
+	private String speakerEmail;
 
 	@Schema(description = "主講者單位_國際會議所以只收英文")
 	private String speakerAffiliation;

@@ -60,8 +60,11 @@ public class ArticleAttachmentServiceImpl extends ServiceImpl<ArticleAttachmentM
 		// 1.轉換檔案
 		ArticleAttachment articleAttachment = articleAttachmentConvert.addDTOToEntity(addArticleAttachmentDTO);
 
+		String fileExtension = s3Util.getFileExtension(file.getOriginalFilename());
+		String fileName = addArticleAttachmentDTO.getName() + fileExtension;
+		
 		// 2.Controller 層較驗過了，檔案必定存在，處理檔案
-		String dbUrl = s3Util.upload(PATH, addArticleAttachmentDTO.getName(), file);
+		String dbUrl = s3Util.upload(PATH, fileName, file);
 		articleAttachment.setPath(dbUrl);
 
 		// 3.放入資料庫

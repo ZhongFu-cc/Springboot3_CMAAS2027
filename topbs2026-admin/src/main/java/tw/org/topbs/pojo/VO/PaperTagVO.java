@@ -38,6 +38,9 @@ public class PaperTagVO {
 	
 	@Schema(description = "主講者")
 	private String speaker;
+	
+	@Schema(description = "主講者信箱")
+	private String speakerEmail;
 
 	@Schema(description = "主講者單位_國際會議所以只收英文")
 	private String speakerAffiliation;
@@ -83,4 +86,7 @@ public class PaperTagVO {
 	
 	@Schema(description = "持有的標籤")
 	private List<Tag> tagList;
+	
+	@Schema(description = "會員註冊費繳費狀態")
+	private String memberPaymentStatus;
 }

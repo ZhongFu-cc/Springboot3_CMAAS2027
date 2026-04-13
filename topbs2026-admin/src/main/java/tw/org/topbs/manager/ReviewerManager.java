@@ -17,6 +17,8 @@ import lombok.RequiredArgsConstructor;
 import tw.org.topbs.convert.PaperConvert;
 import tw.org.topbs.convert.PaperReviewerConvert;
 import tw.org.topbs.enums.ReviewStageEnum;
+import tw.org.topbs.enums.TagTypeEnum;
+import tw.org.topbs.helper.TagAssignmentHelper;
 import tw.org.topbs.pojo.DTO.PutPaperReviewDTO;
 import tw.org.topbs.pojo.VO.PaperReviewerVO;
 import tw.org.topbs.pojo.VO.ReviewVO;
@@ -33,10 +35,13 @@ import tw.org.topbs.service.PaperReviewerFileService;
 import tw.org.topbs.service.PaperReviewerService;
 import tw.org.topbs.service.PaperReviewerTagService;
 import tw.org.topbs.service.PaperService;
+import tw.org.topbs.service.TagService;
 
 @Component
 @RequiredArgsConstructor
 public class ReviewerManager {
+
+	private final TagAssignmentHelper tagAssignmentHelper;
 
 	private final PaperConvert paperConvert;
 	private final PaperService paperService;
@@ -45,8 +50,8 @@ public class ReviewerManager {
 	private final PaperReviewerConvert paperReviewerConvert;
 	private final PaperReviewerTagService paperReviewerTagService;
 	private final PaperReviewerFileService paperReviewerFileService;
-
 	private final PaperAndPaperReviewerService paperAndPaperReviewerService;
+	private final TagService tagService;
 
 	/**
 	 * 查詢單一審稿委員
@@ -243,7 +248,24 @@ public class ReviewerManager {
 	 * @param putPaperReviewDTO
 	 */
 	public void submitReviewScore(PutPaperReviewDTO putPaperReviewDTO) {
-		paperAndPaperReviewerService.submitReviewScore(putPaperReviewDTO);
-	}
+		// 更新完分數，獲得這次修改的資料
+		PaperAndPaperReviewer paperAndPaperReviewer = paperAndPaperReviewerService.submitReviewScore(putPaperReviewDTO);
 
+		// 拿到reviewStage
+		String reviewStage = paperAndPaperReviewer.getReviewStage();
+		ReviewStageEnum reviewStageEnum = ReviewStageEnum.fromValue(reviewStage);
+
+		// 判斷審稿人，該reviewStage是否已全數審核完畢
+		boolean reviewStageFinished = paperAndPaperReviewerService.isReviewFinished(reviewStageEnum.getValue(),
+				putPaperReviewDTO.getPaperReviewerId());
+
+		// 如果該階段全數審核完畢，去刪除 未審核 Tag
+		if (reviewStageFinished) {
+			// 將Not-Review-Finish-RX-group-xx Tag 移除
+			tagAssignmentHelper.removeGroupTagsByPattern(putPaperReviewDTO.getPaperReviewerId(),
+					TagTypeEnum.PAPER_REVIEWER.getType(), reviewStageEnum.getNotReviewTagPrefix(),
+					tagService::getTagIdsByTypeAndNamePattern, paperReviewerTagService::removeTagsFromReviewer);
+		}
+
+	}
 }

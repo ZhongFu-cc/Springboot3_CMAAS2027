@@ -216,6 +216,14 @@ public interface TagService extends IService<Tag> {
 	Tag getOrCreateMemberGroupTag(int groupIndex);
 
 	/**
+	 * 獲取或創建NotPaidGroupTag
+	 * 
+	 * @param groupIndex
+	 * @return
+	 */
+	Tag getOrCreateNotPaidGroupTag(int groupIndex);
+	
+	/**
 	 * 獲取或創建MemberCategoryGroupTag
 	 * 
 	 * @param groupIndex 分組的索引,需 >= 1

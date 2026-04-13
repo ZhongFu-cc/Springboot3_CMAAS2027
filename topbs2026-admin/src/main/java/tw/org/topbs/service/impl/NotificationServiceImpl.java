@@ -124,8 +124,8 @@ public class NotificationServiceImpl implements NotificationService {
 		if ("zh_TW".equalsIgnoreCase(LANGUAGE)) {
 			languagePath = "/zh_tw";
 		}
-		String htmlTemplatePath = "html" + languagePath + "/registration-success-notification.html";
-		String textTemplatePath = "plain-text" + languagePath + "/registration-success-notification.txt";
+		String htmlTemplatePath = "html" + languagePath + "/group-registration-success-notification.html";
+		String textTemplatePath = "plain-text" + languagePath + "/group-registration-success-notification.txt";
 
 		// 4.產生具有HTML 和 純文字的兩種信件內容 EmailBodyContent  並返回
 		String htmlContent = templateEngine.process(htmlTemplatePath, context);
@@ -151,8 +151,8 @@ public class NotificationServiceImpl implements NotificationService {
 		if ("zh_TW".equalsIgnoreCase(LANGUAGE)) {
 			languagePath = "/zh_tw";
 		}
-		String htmlTemplatePath = "html" + languagePath + "/registration-success-notification.html";
-		String textTemplatePath = "plain-text" + languagePath + "/registration-success-notification.txt";
+		String htmlTemplatePath = "html" + languagePath + "/retrieve-password.html";
+		String textTemplatePath = "plain-text" + languagePath + "/retrieve-password.txt";
 
 		// 4.產生具有HTML 和 純文字的兩種信件內容 EmailBodyContent  並返回
 		String htmlContent = templateEngine.process(htmlTemplatePath, context);
@@ -182,8 +182,8 @@ public class NotificationServiceImpl implements NotificationService {
 		if ("zh_TW".equalsIgnoreCase(LANGUAGE)) {
 			languagePath = "/zh_tw";
 		}
-		String htmlTemplatePath = "html" + languagePath + "/registration-success-notification.html";
-		String textTemplatePath = "plain-text" + languagePath + "/registration-success-notification.txt";
+		String htmlTemplatePath = "html" + languagePath + "/abstract-success-notification.html";
+		String textTemplatePath = "plain-text" + languagePath + "/abstract-success-notification.txt";
 
 		// 4.產生具有HTML 和 純文字的兩種信件內容 EmailBodyContent  並返回
 		String htmlContent = templateEngine.process(htmlTemplatePath, context);
@@ -206,13 +206,11 @@ public class NotificationServiceImpl implements NotificationService {
 		context.setVariable("updatedItems", "CV and Profile Photo");
 		context.setVariable("adminDashboardUrl", adminDashboardUrl);
 
-		// 3. 根據 project.language 選擇模板路徑（無需 if-else 太多，簡單拼接）
+		// 3. 這是給管理者的信，所以預設信件就好
 		String languagePath = "";
-		if ("zh_TW".equalsIgnoreCase(LANGUAGE)) {
-			languagePath = "/zh_tw";
-		}
-		String htmlTemplatePath = "html" + languagePath + "/registration-success-notification.html";
-		String textTemplatePath = "plain-text" + languagePath + "/registration-success-notification.txt";
+
+		String htmlTemplatePath = "html" + languagePath + "/speaker-update-notification.html";
+		String textTemplatePath = "plain-text" + languagePath + "/speaker-update-notification.txt";
 
 		// 4.產生具有HTML 和 純文字的兩種信件內容 EmailBodyContent  並返回
 		String htmlContent = templateEngine.process(htmlTemplatePath, context);
@@ -228,13 +226,11 @@ public class NotificationServiceImpl implements NotificationService {
 		context.setVariable(FIELD_BANNER_PHOTO_URL, bannerPhotoUrl);
 		context.setVariable(FIELD_CONFERENCE_NAME, PROJECT_NAME);
 
-		// 2. 根據 project.language 選擇模板路徑（無需 if-else 太多，簡單拼接）
+		// 2. 這是給管理者的信，所以預設信件就好
 		String languagePath = "";
-		if ("zh_TW".equalsIgnoreCase(LANGUAGE)) {
-			languagePath = "/zh_tw";
-		}
-		String htmlTemplatePath = "html" + languagePath + "/registration-success-notification.html";
-		String textTemplatePath = "plain-text" + languagePath + "/registration-success-notification.txt";
+
+		String htmlTemplatePath = "html" + languagePath + "/walk-in-registration-notification.html";
+		String textTemplatePath = "plain-text" + languagePath + "/walk-in-registration-notification.txt";
 
 		// 3.產生具有HTML 和 純文字的兩種信件內容 EmailBodyContent  並返回
 		String htmlContent = templateEngine.process(htmlTemplatePath, context);

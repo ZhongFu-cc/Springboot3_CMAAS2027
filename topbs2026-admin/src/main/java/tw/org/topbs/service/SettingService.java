@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import tw.org.topbs.enums.RegistrationPhaseEnum;
 import tw.org.topbs.exception.SettingException;
 import tw.org.topbs.pojo.DTO.putEntityDTO.PutSettingDTO;
+import tw.org.topbs.pojo.VO.SettingVO;
 import tw.org.topbs.pojo.entity.Setting;
 
 public interface SettingService extends IService<Setting> {
@@ -26,14 +27,6 @@ public interface SettingService extends IService<Setting> {
 	 */
 	void updateSetting(PutSettingDTO putSettingDTO);
 
-	/**
-	 * 檢查摘要投稿功能目前是否開放。
-	 * 判斷依據為當前時間是否介於摘要開放投稿時間與截止時間之間 (包含起始時間，不包含截止時間)。
-	 *
-	 * @return 如果摘要投稿開放則返回 true，否則返回 false。
-	 * @throws SettingException 如果摘要投稿相關的設定時間不完整，則拋出此異常。
-	 */
-	Boolean isAbstractSubmissionOpen();
 
 	 /**
      * 判斷當前時間屬於早鳥優惠的哪一個階段。
@@ -61,8 +54,9 @@ public interface SettingService extends IService<Setting> {
 	Boolean canPlaceOrder();
 
 	/**
-	 * 檢查註冊功能目前是否開放。
-	 * 判斷依據為當前時間是否在最後註冊時間之前或等於最後註冊時間。
+	 * 檢查註冊功能目前是否開放。<br>
+	 * 判斷依據為當前時間是否在最後註冊時間之前或等於最後註冊時間。<br>
+	 * 兼容活動日的註冊
 	 *
 	 * @return 如果註冊開放則返回 true，否則返回 false。
 	 * @throws SettingException 如果註冊相關的設定時間未設定，則拋出此異常。
@@ -79,6 +73,15 @@ public interface SettingService extends IService<Setting> {
 	Boolean isGroupRegistrationOpen();
 
 	/**
+	 * 檢查摘要投稿功能目前是否開放。
+	 * 判斷依據為當前時間是否介於摘要開放投稿時間與截止時間之間 (包含起始時間，不包含截止時間)。
+	 *
+	 * @return 如果摘要投稿開放則返回 true，否則返回 false。
+	 * @throws SettingException 如果摘要投稿相關的設定時間不完整，則拋出此異常。
+	 */
+	Boolean isAbstractSubmissionOpen();
+	
+	/**
 	 * 檢查 Slide 上傳功能目前是否開放。
 	 * 判斷依據為當前時間是否介於 Slide 開放上傳時間與截止時間之間 (包含起始時間，不包含截止時間)。
 	 *
@@ -86,4 +89,7 @@ public interface SettingService extends IService<Setting> {
 	 * @throws SettingException 如果 Slide 上傳相關的設定時間不完整，則拋出此異常。
 	 */
 	Boolean isSlideUploadOpen();
+
+	
+	SettingVO getFrontSetting();
 }

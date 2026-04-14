@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import tw.org.topbs.pojo.DTO.putEntityDTO.PutSettingDTO;
+import tw.org.topbs.pojo.VO.SettingVO;
 import tw.org.topbs.pojo.entity.Setting;
 import tw.org.topbs.service.SettingService;
 import tw.org.topbs.utils.R;
@@ -29,7 +30,6 @@ public class SettingController {
 
 	private final SettingService settingService;
 
-
 	@GetMapping()
 	@Operation(summary = "查詢設定")
 	public R<Setting> getSetting() {
@@ -37,6 +37,12 @@ public class SettingController {
 		return R.ok(setting);
 	}
 
+	@GetMapping("front")
+	@Operation(summary = "查詢各類功能是否開放")
+	public R<SettingVO> getFrontSetting() {
+		SettingVO frontSetting = settingService.getFrontSetting();
+		return R.ok(frontSetting);
+	}
 
 	@PutMapping
 	@Parameters({
@@ -47,8 +53,5 @@ public class SettingController {
 		settingService.updateSetting(putSettingDTO);
 		return R.ok();
 	}
-
-
-
 
 }

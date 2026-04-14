@@ -10,14 +10,17 @@ import lombok.Data;
 @Data
 public class AddGroupMemberDTO {
 	
-	@NotBlank
+//	@NotBlank
 	@Schema(description = "同時作為護照號碼 和 台灣身分證字號使用")
 	private String idCard;
 	
-	@NotBlank
+//	@NotBlank
 	@Schema(description = "頭銜 - 前墜詞")
 	private String title;
 
+	@Schema(description = "中文姓名，外國人非必填，台灣人必填")
+	private String chineseName;
+	
 	@NotBlank
 	@Schema(description = "名字, 華人的名在後  , 外國人的名在前")
 	private String firstName;
@@ -25,9 +28,6 @@ public class AddGroupMemberDTO {
 	@NotBlank
 	@Schema(description = "姓氏, 華人的姓氏在前, 外國人的姓氏在後")
 	private String lastName;
-	
-	@Schema(description = "中文姓名，外國人非必填，台灣人必填")
-	private String chineseName;
 
 	@NotBlank
 	@Schema(description = "E-Mail")
@@ -48,9 +48,7 @@ public class AddGroupMemberDTO {
 	@Schema(description = "用於分類會員資格, 1為 Member，2為 Others，3為 Non-Member，4為 MVP，5為 Speaker，6為 Moderator，7為 Staff")
 	private Integer category;
 	
-
 	@Schema(description = "會員資格的身份補充")
-	@TableField("category_extra")
 	private String categoryExtra;
 
 	@NotBlank

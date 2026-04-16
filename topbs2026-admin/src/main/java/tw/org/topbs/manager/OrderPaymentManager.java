@@ -251,6 +251,11 @@ public class OrderPaymentManager {
 					tagAssignmentHelper.assignTag(attendees.getAttendeesId(), attendeesService::getAttendeesGroupIndex,
 							tagService::getOrCreateAttendeesGroupTag, attendeesTagService::addAttendeesTag);
 
+					// 4-4.移除會員 註冊費未付款 Tag
+					tagAssignmentHelper.removeGroupTagsByPattern(slaveMember.getMemberId(), TagTypeEnum.MEMBER.getType(),
+							"註冊費未付款", tagService::getTagIdsByTypeAndNamePattern, memberTagService::removeTagsFromMember);
+
+					
 				}
 
 			}

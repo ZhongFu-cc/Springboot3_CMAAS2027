@@ -229,7 +229,7 @@ project:
   # 語言，可選值zh_TW / en ，用於選擇中文信zh_TW 或 英文信en
   language: en
   # Banner 圖片
-  banner-url: https://tobss.org.tw/_nuxt/260310-home-banner.Djhj-gRq.jpg
+  banner-url: https://tobss.org.tw/img/banner.jpg
   # 群組相關，與一次寄送 email 數量有關
   group-size: 200
   # 報名模式，可選值: FREE / PREPAID / POSTPAID ，POSTPAID尚未實現
@@ -274,9 +274,9 @@ project:
         staff: 0
       # 第一階段早鳥，外國人
       foreign:
-        member: 700
-        others: 600
-        non-member: 1000
+        member: 9600
+        others: 4800
+        non-member: 12800
         mvp: 0
         speaker: 0
         moderator: 0
@@ -294,9 +294,9 @@ project:
         staff: 0
       # 第二階段早鳥，外國人
       foreign:
-        member: 700
-        others: 600
-        non-member: 1000
+        member: 9600
+        others: 4800
+        non-member: 12800
         mvp: 0
         speaker: 0
         moderator: 0
@@ -314,9 +314,9 @@ project:
         staff: 0
       # 第三階段早鳥，外國人
       foreign:
-        member: 700
-        others: 600
-        non-member: 1000
+        member: 9600
+        others: 4800
+        non-member: 12800
         mvp: 0
         speaker: 0
         moderator: 0
@@ -334,9 +334,9 @@ project:
         staff: 0
       # 一般階段，外國人
       foreign:
-        member: 1000
-        others: 1200
-        non-member: 1500
+        member: 12800
+        others: 6400
+        non-member: 16000
         mvp: 0
         speaker: 0
         moderator: 0
@@ -354,9 +354,9 @@ project:
         staff: 0
       # 現場報名，外國人
       foreign:
-        member: 1500
-        others: 1800
-        non-member: 2000
+        member: 12800
+        others: 6400
+        non-member: 16000
         mvp: 0
         speaker: 0
         moderator: 0

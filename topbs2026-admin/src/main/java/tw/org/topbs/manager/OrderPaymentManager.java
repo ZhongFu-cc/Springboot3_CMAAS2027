@@ -27,7 +27,6 @@ import tw.org.topbs.pojo.entity.Attendees;
 import tw.org.topbs.pojo.entity.Member;
 import tw.org.topbs.pojo.entity.Orders;
 import tw.org.topbs.pojo.entity.Payment;
-import tw.org.topbs.pojo.entity.Setting;
 import tw.org.topbs.service.AttendeesService;
 import tw.org.topbs.service.AttendeesTagService;
 import tw.org.topbs.service.MemberService;
@@ -116,16 +115,19 @@ public class OrderPaymentManager {
 
 	}
 
+	/**
+	 * 產生付款頁面
+	 * 
+	 * @param orderId
+	 * @return
+	 */
 	public String generatePaymentPage(Long orderId) {
-
-		// 拿到配置設定
-		Setting setting = settingService.getSetting();
 
 		// 獲取當前時間
 		LocalDateTime now = LocalDateTime.now();
 
-		// 先判斷是否超過註冊時間，當超出註冊時間直接拋出異常，讓全局異常去處理
-		if (now.isAfter(setting.getLastRegistrationTime())) {
+		// 先判斷是否處於可註冊時間，當超出註冊時間直接拋出異常，讓全局異常去處理
+		if (!settingService.isRegistrationOpen()) {
 			throw new RegistrationClosedException(messageHelper.get(I18nMessageKey.Payment.CLOSED));
 		}
 
@@ -178,6 +180,11 @@ public class OrderPaymentManager {
 
 	}
 
+	/**
+	 * 處理綠界的回調資訊
+	 * 
+	 * @param ECPayResponseDTO
+	 */
 	@Transactional
 	public void handleEcpayCallback(ECPayResponseDTO ECPayResponseDTO) {
 
@@ -244,6 +251,11 @@ public class OrderPaymentManager {
 					tagAssignmentHelper.assignTag(attendees.getAttendeesId(), attendeesService::getAttendeesGroupIndex,
 							tagService::getOrCreateAttendeesGroupTag, attendeesTagService::addAttendeesTag);
 
+					// 4-4.移除會員 註冊費未付款 Tag
+					tagAssignmentHelper.removeGroupTagsByPattern(slaveMember.getMemberId(), TagTypeEnum.MEMBER.getType(),
+							"註冊費未付款", tagService::getTagIdsByTypeAndNamePattern, memberTagService::removeTagsFromMember);
+
+					
 				}
 
 			}

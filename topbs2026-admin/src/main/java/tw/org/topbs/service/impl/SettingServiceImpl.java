@@ -14,6 +14,7 @@ import tw.org.topbs.enums.RegistrationPhaseEnum;
 import tw.org.topbs.exception.SettingException;
 import tw.org.topbs.mapper.SettingMapper;
 import tw.org.topbs.pojo.DTO.putEntityDTO.PutSettingDTO;
+import tw.org.topbs.pojo.VO.SettingVO;
 import tw.org.topbs.pojo.entity.Setting;
 import tw.org.topbs.service.SettingService;
 
@@ -157,15 +158,33 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting> impl
 		if (setting == null || setting.getLastRegistrationTime() == null) {
 			throw new SettingException("註冊設置不完整：請檢查最後註冊時間是否已配置。");
 		}
+
+		// 檢查 活動起始/結束日期 是否配置
+		if (setting.getEventStartDate() == null || setting.getEventEndDate() == null) {
+			throw new SettingException("註冊設置不完整：請檢查 活動起始/結束日期 是否已配置。");
+		}
+
+		// 獲取當前時間
 		LocalDateTime now = LocalDateTime.now();
-		return now.isBefore(setting.getLastRegistrationTime()) || now.isEqual(setting.getLastRegistrationTime());
+		
+	    // 條件 A：當前時間是否在「最後註冊時間」之前 (精確到秒)
+	    boolean isBeforeLastRegistration = !now.isAfter(setting.getLastRegistrationTime());
+
+	    // 條件 B：當前日期是否落在活動區間內 (包含起訖日當天)
+	    LocalDate eventStartDate = setting.getEventStartDate();
+	    LocalDate eventEndDate = setting.getEventEndDate();
+	    // 判斷是否處於活動時間
+	    boolean isInEventPeriod = isDuringTheEvent(now,eventStartDate,eventEndDate);
+
+	    // 只要符合其中一個條件，就允許註冊
+	    return isBeforeLastRegistration || isInEventPeriod;
 	}
 
 	@Override
 	public Boolean isGroupRegistrationOpen() {
 		Setting setting = this.getSetting();
 		// 檢查設定是否存在，以及最後 團體報名 註冊時間是否已設定。
-		if (setting == null || setting.getLastRegistrationTime() == null) {
+		if (setting == null || setting.getLastGroupRegistrationTime() == null) {
 			throw new SettingException("團體報名 註冊設置不完整：請檢查最後團體報名註冊時間是否已配置。");
 		}
 		LocalDateTime now = LocalDateTime.now();
@@ -198,6 +217,19 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting> impl
 	private boolean isBetweenInclusiveStartExclusiveEnd(LocalDateTime target, LocalDateTime start, LocalDateTime end) {
 		// 呼叫此方法前，已經在各自的檢查方法中處理了 null 值判斷，因此這裡直接進行時間比較。
 		return (target.isAfter(start) || target.isEqual(start)) && target.isBefore(end);
+	}
+
+	@Override
+	public SettingVO getFrontSetting() {
+		SettingVO vo = new SettingVO();
+		
+		// 設定各類功能 「當前」的開啟狀態
+		vo.setIsRegistrationOpen(isRegistrationOpen());
+		vo.setIsGroupRegistrationOpen(isGroupRegistrationOpen());
+		vo.setIsAbstractSubmissionOpen(isAbstractSubmissionOpen());
+		vo.setIsSlideUploadOpen(isSlideUploadOpen());
+		
+		return vo;
 	}
 
 }

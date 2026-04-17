@@ -21,6 +21,7 @@ import tw.org.topbs.enums.TagTypeEnum;
 import tw.org.topbs.helper.TagAssignmentHelper;
 import tw.org.topbs.pojo.DTO.PutPaperReviewDTO;
 import tw.org.topbs.pojo.VO.PaperReviewerVO;
+import tw.org.topbs.pojo.VO.ReviewStatsVO;
 import tw.org.topbs.pojo.VO.ReviewVO;
 import tw.org.topbs.pojo.VO.ReviewerScoreStatsVO;
 import tw.org.topbs.pojo.entity.Paper;
@@ -190,6 +191,39 @@ public class ReviewerManager {
 	}
 
 	/** -------------------------審稿人使用--------------------- */
+
+	
+	/**
+	 * 獲得審稿人，當前階段的審稿統計狀況
+	 * @param reviewerId
+	 * @param reviewStageEnum
+	 * @return
+	 */
+	public ReviewStatsVO getReviewStatsVOByReviewerIdAndReviewStage(Long reviewerId, ReviewStageEnum reviewStageEnum) {
+		List<PaperAndPaperReviewer> papersAndReviewers = paperAndPaperReviewerService
+				.getPapersAndReviewersByReviewerId(reviewerId);
+
+		// 記得給初始值 0
+		int toBeReviewedCount = 0;
+		int reviewedCount = 0;
+		int notReviewedCount = 0;
+
+		for (PaperAndPaperReviewer e : papersAndReviewers) {
+			// 先過濾 Stage
+			if (e.getReviewStage().equals(reviewStageEnum.getValue())) {
+				toBeReviewedCount++; // 應審核數量 +1
+
+				if (e.getScore() != null) {
+					reviewedCount++; // 已審核 +1
+				} else {
+					notReviewedCount++; // 未審核 +1
+				}
+			}
+		}
+
+		// 假設你的 VO 有這個 Constructor 或使用 Setter
+		return new ReviewStatsVO(toBeReviewedCount, reviewedCount, notReviewedCount);
+	}
 
 	/**
 	 * 根據審稿委員ID、審核階段，獲得要審稿的稿件對象 (分頁)

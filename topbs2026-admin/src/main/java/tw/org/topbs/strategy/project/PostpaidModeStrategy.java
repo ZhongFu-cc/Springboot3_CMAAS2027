@@ -83,9 +83,15 @@ public class PostpaidModeStrategy implements ProjectModeStrategy {
 		if (isMaster) {
 			// Master 負責付錢
 			ordersService.createGroupRegistrationOrder(totalFee, member);
+			// 獲取當下「未付款」的Member群體的Index，賦予「未繳費」標籤
+			tagAssignmentHelper.assignTag(member.getMemberId(), ordersService::getNotPaidRegistrationOrderGroupIndex,
+					tagService::getOrCreateNotPaidGroupTag, memberTagService::addMemberTag);
 		} else {
 			// Slave 不付錢，0元訂單，未付款
 			ordersService.createFreeGroupRegistrationOrder(member);
+			// 獲取當下「未付款」的Member群體的Index，賦予「未繳費」標籤
+			tagAssignmentHelper.assignTag(member.getMemberId(), ordersService::getNotPaidRegistrationOrderGroupIndex,
+					tagService::getOrCreateNotPaidGroupTag, memberTagService::addMemberTag);
 		}
 
 		// 2.產生系統團體報名通知信

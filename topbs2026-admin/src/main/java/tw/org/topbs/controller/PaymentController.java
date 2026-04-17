@@ -85,6 +85,15 @@ public class PaymentController {
 		orderPaymentManager.handleEcpayCallback(ECPayResponseDTO);
 		return "1|OK";
 	}
+	
+	// API測試用
+//	@PostMapping()
+//	@Operation(summary = "接收綠界回傳資料，新增單一交易明細紀錄")
+//	public String savePayment(@RequestBody @Valid ECPayResponseDTO ECPayResponseDTO) {
+//		System.out.println(ECPayResponseDTO);
+//		orderPaymentManager.handleEcpayCallback(ECPayResponseDTO);
+//		return "1|OK";
+//	}
 
 	@PutMapping
 	@Parameters({

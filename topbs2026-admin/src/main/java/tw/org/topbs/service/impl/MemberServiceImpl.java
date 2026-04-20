@@ -29,6 +29,7 @@ import tw.org.topbs.convert.MemberConvert;
 import tw.org.topbs.enums.OrderStatusEnum;
 import tw.org.topbs.exception.AccountPasswordWrongException;
 import tw.org.topbs.exception.ForgetPasswordException;
+import tw.org.topbs.exception.MemberException;
 import tw.org.topbs.exception.RegisteredAlreadyExistsException;
 import tw.org.topbs.helper.MessageHelper;
 import tw.org.topbs.mapper.MemberMapper;
@@ -39,6 +40,7 @@ import tw.org.topbs.pojo.DTO.MemberIdCardLogin;
 import tw.org.topbs.pojo.DTO.MemberLoginDTO;
 import tw.org.topbs.pojo.DTO.WalkInRegistrationDTO;
 import tw.org.topbs.pojo.DTO.addEntityDTO.AddMemberDTO;
+import tw.org.topbs.pojo.DTO.putEntityDTO.PutMemberDTO;
 import tw.org.topbs.pojo.DTO.putEntityDTO.PutMemberForAdminDTO;
 import tw.org.topbs.pojo.VO.MemberOrderVO;
 import tw.org.topbs.pojo.VO.MemberTagVO;
@@ -239,7 +241,8 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 	}
 
 	@Override
-	public IPage<MemberTagVO> getUnpaidMemberPage(Page<Member> page, List<Orders> orderList,String country, String queryText) {
+	public IPage<MemberTagVO> getUnpaidMemberPage(Page<Member> page, List<Orders> orderList, String country,
+			String queryText) {
 		// 1.從訂單表中提取出會員ID 列表
 		Set<Long> memberIdSet = orderList.stream().map(orders -> orders.getMemberId()).collect(Collectors.toSet());
 
@@ -251,24 +254,24 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
 		// 判斷是否為本國籍
 		Boolean isNational = CountryUtil.isNational(country);
-		
+
 		// 如果會員ID不為Null 以及 集合內元素不為空
 		if (memberIdSet != null && !memberIdSet.isEmpty()) {
 
 			// 有 '註冊費' 這張訂單且處於未繳費的 memberIdList，且如果有額外查詢資料 or 進行模糊查詢
 			LambdaQueryWrapper<Member> memberWrapper = new LambdaQueryWrapper<>();
 			memberWrapper.in(Member::getMemberId, memberIdSet)
-			// 如果「本國人」,加搜尋條件,找國家 為 Taiwan的資料
-			.eq(isNational,Member::getCountry,CountryUtil.getHomeCountry())
-			// 如果「外國人」,加搜尋條件,找國家「不為」Taiwan的資料
-			.ne(!isNational,Member::getCountry,CountryUtil.getHomeCountry())
-			.and(StringUtils.isNotBlank(queryText), wrapper -> {
-				wrapper.like(Member::getRemitAccountLast5, queryText)
-						.or()
-						.like(Member::getChineseName, queryText)
-						.or()
-						.like(Member::getIdCard, queryText);
-			});
+					// 如果「本國人」,加搜尋條件,找國家 為 Taiwan的資料
+					.eq(isNational, Member::getCountry, CountryUtil.getHomeCountry())
+					// 如果「外國人」,加搜尋條件,找國家「不為」Taiwan的資料
+					.ne(!isNational, Member::getCountry, CountryUtil.getHomeCountry())
+					.and(StringUtils.isNotBlank(queryText), wrapper -> {
+						wrapper.like(Member::getRemitAccountLast5, queryText)
+								.or()
+								.like(Member::getChineseName, queryText)
+								.or()
+								.like(Member::getIdCard, queryText);
+					});
 
 			// 獲得 member 的分頁對象
 			Page<Member> memberPage = baseMapper.selectPage(page, memberWrapper);
@@ -410,11 +413,32 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 		return member;
 	};
 
-	//	@Override
-	//	public void updateMember(PutMemberDTO putMemberDTO) {
-	//		Member member = memberConvert.putDTOToEntity(putMemberDTO);
-	//		baseMapper.updateById(member);
-	//	}
+	@Override
+	public void updateMember(PutMemberDTO putMemberDTO) {
+		Member newMemberInfo = memberConvert.putDTOToEntity(putMemberDTO);
+		Member oldMemberInfo = this.getMember(newMemberInfo.getMemberId());
+
+		// 抽出這次更新時的國籍
+		String oldMemberCountry = CountryUtil.getTaiwanOrForeign(oldMemberInfo.getCountry());
+		String newMemberCountry = CountryUtil.getTaiwanOrForeign(newMemberInfo.getCountry());
+
+		// 如果國籍有變更 國外=>台灣 or 台灣=>國外 則拒絕變更
+		if (!oldMemberCountry.equals(newMemberCountry)) {
+			throw new MemberException("Nationality cannot be changed between domestic and foreign statuses.");
+		}
+
+		String oldMemberIdCard = oldMemberInfo.getIdCard();
+		String newMemberIdCard = newMemberInfo.getIdCard();
+
+		// 台灣人註冊,idCard不許修改,因為這個是帳號
+		if (CountryUtil.isNational(newMemberCountry) && oldMemberIdCard.equals(newMemberIdCard)) {
+			throw new MemberException("身分證不允許更新，如需更新請洽工作人員");
+		}
+
+		// 如果前述條件都通過,進行更新
+		baseMapper.updateById(newMemberInfo);
+
+	}
 
 	@Override
 	public void updateMemberForAdmin(PutMemberForAdminDTO putMemberForAdminDTO) {
@@ -498,7 +522,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 		throw new AccountPasswordWrongException(messageHelper.get(I18nMessageKey.Registration.Auth.WRONG_ACCOUNT));
 
 	}
-	
+
 	@Override
 	public SaTokenInfo foreignLogin(MemberLoginDTO memberLoginDTO) {
 
@@ -543,8 +567,6 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 		throw new AccountPasswordWrongException(messageHelper.get(I18nMessageKey.Registration.Auth.WRONG_ACCOUNT));
 
 	}
-
-
 
 	@Override
 	public void logout() {

@@ -430,27 +430,15 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 		String oldMemberIdCard = oldMemberInfo.getIdCard();
 		String newMemberIdCard = newMemberInfo.getIdCard();
 
-		// 台灣人註冊,idCard不許修改,因為這代表帳號
-		if (CountryUtil.isNational(newMemberCountry) && !oldMemberIdCard.equals(newMemberIdCard)) {
-			throw new MemberException("身分證不允許更新，如需更新請洽工作人員");
-		}
+		System.out.println("舊ID_Card: " + oldMemberIdCard);
+		System.out.println("新ID_Card: " + newMemberIdCard);
 
-		String oldMemberEmail = oldMemberInfo.getEmail();
-		String newMemberEmail = newMemberInfo.getEmail();
-
-		// 外國人註冊,email不許修改,因為這代表帳號
-		if (!CountryUtil.isNational(newMemberCountry) && !oldMemberEmail.equals(newMemberEmail)) {
-			throw new MemberException("Email updates are not allowed. Please contact staff for updates.");
-		}
-
-		// 判斷要更新的email，是否已被註冊
-		LambdaQueryWrapper<Member> emailQueryWrapper = new LambdaQueryWrapper<>();
-		emailQueryWrapper.eq(Member::getEmail, newMemberInfo.getEmail());
-		Long emailCount = baseMapper.selectCount(emailQueryWrapper);
-
-		if (emailCount > 0) {
-			throw new RegisteredAlreadyExistsException(
-					messageHelper.get(I18nMessageKey.Registration.Auth.EMAIL_REGISTERED));
+		// 台灣人註冊
+		if (CountryUtil.isNational(newMemberCountry)) {
+			// idCard有傳值，且跟舊資料不一致，idCard不許修改,因為這代表帳號
+			if (newMemberIdCard != null && !oldMemberIdCard.equals(newMemberIdCard)) {
+				throw new MemberException("身分證不允許更新，如需更新請洽工作人員");
+			}
 		}
 
 		if (newMemberInfo.getIdCard() != null) {

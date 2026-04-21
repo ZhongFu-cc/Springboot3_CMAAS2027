@@ -435,6 +435,28 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 			throw new MemberException("身分證不允許更新，如需更新請洽工作人員");
 		}
 
+		// 判斷要更新的email，是否已被註冊
+		LambdaQueryWrapper<Member> emailQueryWrapper = new LambdaQueryWrapper<>();
+		emailQueryWrapper.eq(Member::getEmail, newMemberInfo.getEmail());
+		Long emailCount = baseMapper.selectCount(emailQueryWrapper);
+
+		if (emailCount > 0) {
+			throw new RegisteredAlreadyExistsException(
+					messageHelper.get(I18nMessageKey.Registration.Auth.EMAIL_REGISTERED));
+		}
+
+		if (newMemberInfo.getIdCard() != null) {
+			// 判斷要更新的身分證，是否已被註冊
+			LambdaQueryWrapper<Member> idCardQueryWrapper = new LambdaQueryWrapper<>();
+			idCardQueryWrapper.eq(Member::getIdCard, newMemberInfo.getIdCard());
+			Long idCardCount = baseMapper.selectCount(idCardQueryWrapper);
+
+			if (idCardCount > 0) {
+				throw new RegisteredAlreadyExistsException(
+						messageHelper.get(I18nMessageKey.Registration.Auth.ID_CARD_REGISTERED));
+			}
+		}
+
 		// 如果前述條件都通過,進行更新
 		baseMapper.updateById(newMemberInfo);
 

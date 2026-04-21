@@ -430,9 +430,17 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 		String oldMemberIdCard = oldMemberInfo.getIdCard();
 		String newMemberIdCard = newMemberInfo.getIdCard();
 
-		// 台灣人註冊,idCard不許修改,因為這個是帳號
-		if (CountryUtil.isNational(newMemberCountry) && oldMemberIdCard.equals(newMemberIdCard)) {
+		// 台灣人註冊,idCard不許修改,因為這代表帳號
+		if (CountryUtil.isNational(newMemberCountry) && !oldMemberIdCard.equals(newMemberIdCard)) {
 			throw new MemberException("身分證不允許更新，如需更新請洽工作人員");
+		}
+
+		String oldMemberEmail = oldMemberInfo.getEmail();
+		String newMemberEmail = newMemberInfo.getEmail();
+
+		// 外國人註冊,email不許修改,因為這代表帳號
+		if (!CountryUtil.isNational(newMemberCountry) && !oldMemberEmail.equals(newMemberEmail)) {
+			throw new MemberException("Email updates are not allowed. Please contact staff for updates.");
 		}
 
 		// 判斷要更新的email，是否已被註冊

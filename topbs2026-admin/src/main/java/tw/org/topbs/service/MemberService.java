@@ -16,6 +16,7 @@ import tw.org.topbs.pojo.DTO.MemberIdCardLogin;
 import tw.org.topbs.pojo.DTO.MemberLoginDTO;
 import tw.org.topbs.pojo.DTO.WalkInRegistrationDTO;
 import tw.org.topbs.pojo.DTO.addEntityDTO.AddMemberDTO;
+import tw.org.topbs.pojo.DTO.putEntityDTO.PutMemberDTO;
 import tw.org.topbs.pojo.DTO.putEntityDTO.PutMemberForAdminDTO;
 import tw.org.topbs.pojo.VO.MemberOrderVO;
 import tw.org.topbs.pojo.VO.MemberTagVO;
@@ -158,7 +159,11 @@ public interface MemberService extends IService<Member> {
 	 */
 	Member addMemberOnSite(WalkInRegistrationDTO walkInRegistrationDTO);
 
-	//	void updateMember(PutMemberForAdminDTO putMemberForAdminDTO);
+	/**
+	 * 會員個人更新基本資料
+	 * @param putMemberDTO
+	 */
+	void updateMember(PutMemberDTO putMemberDTO);
 
 	void updateMemberForAdmin(PutMemberForAdminDTO putMemberForAdminDTO);
 

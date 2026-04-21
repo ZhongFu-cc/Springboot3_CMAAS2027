@@ -51,6 +51,7 @@ import tw.org.topbs.pojo.DTO.MemberLoginDTO;
 import tw.org.topbs.pojo.DTO.PutMemberIdDTO;
 import tw.org.topbs.pojo.DTO.addEntityDTO.AddMemberDTO;
 import tw.org.topbs.pojo.DTO.addEntityDTO.AddTagToMemberDTO;
+import tw.org.topbs.pojo.DTO.putEntityDTO.PutMemberDTO;
 import tw.org.topbs.pojo.DTO.putEntityDTO.PutMemberForAdminDTO;
 import tw.org.topbs.pojo.VO.MemberOrderVO;
 import tw.org.topbs.pojo.VO.MemberTagVO;
@@ -101,11 +102,11 @@ public class MemberController {
 	@Parameters({
 			@Parameter(name = "Authorization-member", description = "請求頭token,token-value開頭必須為Bearer ", required = true, in = ParameterIn.HEADER) })
 	@SaCheckLogin(type = StpKit.MEMBER_TYPE)
-	public R<Member> getMemberForOwner() {
+	public R<MemberVO> getMemberForOwner() {
 		// 根據token 拿取本人的數據
 		Member memberCache = memberService.getMemberInfo();
-		Member member = memberService.getMember(memberCache.getMemberId());
-		return R.ok(member);
+		MemberVO memberVO = memberOrderManager.getMemberVO(memberCache.getMemberId());
+		return R.ok(memberVO);
 	}
 
 	@GetMapping("{id}")
@@ -182,7 +183,7 @@ public class MemberController {
 			@RequestParam(value = "country", required = true) String country,
 			@RequestParam(value = "queryText", required = false) String queryText) {
 		Page<Member> pageable = new Page<Member>(page, size);
-		IPage<MemberTagVO> unpaidMemberPage = memberOrderManager.getUnpaidMemberPage(pageable,country, queryText);
+		IPage<MemberTagVO> unpaidMemberPage = memberOrderManager.getUnpaidMemberPage(pageable, country, queryText);
 
 		return R.ok(unpaidMemberPage);
 	}
@@ -240,23 +241,28 @@ public class MemberController {
 		return R.ok();
 	}
 
-	// 暫時沒啟用,因為讓他隨意修改,資料會對不上
-	//	@PutMapping("owner")
-	//	@Parameters({
-	//			@Parameter(name = "Authorization-member", description = "請求頭token,token-value開頭必須為Bearer ", required = true, in = ParameterIn.HEADER) })
-	//	@SaCheckLogin(type = StpKit.MEMBER_TYPE)
-	//	@Operation(summary = "修改會員資料For會員本人")
-	//	public R<Member> updateMemberForOwner(@RequestBody @Valid PutMemberDTO putMemberDTO) {
-	//		// 根據token 拿取本人的數據
-	//		Member memberCache = memberService.getMemberInfo();
-	//		if (memberCache.getMemberId().equals(putMemberDTO.getMemberId())) {
-	//			memberService.updateMember(putMemberDTO);
-	//			return R.ok();
-	//		}
-	//
-	//		return R.fail("The Token is not the user's own and cannot retrieve non-user's information.");
-	//
-	//	}
+	/**
+	 * 個人修改自身資料
+	 * 
+	 * @param putMemberDTO
+	 * @return
+	 */
+	@PutMapping("owner")
+	@Parameters({
+			@Parameter(name = "Authorization-member", description = "請求頭token,token-value開頭必須為Bearer ", required = true, in = ParameterIn.HEADER) })
+	@SaCheckLogin(type = StpKit.MEMBER_TYPE)
+	@Operation(summary = "修改會員資料For會員本人")
+	public R<Member> updateMemberForOwner(@RequestBody @Valid PutMemberDTO putMemberDTO) {
+		// 根據token 拿取本人的數據
+		Member memberCache = memberService.getMemberInfo();
+		if (memberCache.getMemberId().equals(putMemberDTO.getMemberId())) {
+			memberService.updateMember(putMemberDTO);
+			return R.ok();
+		}
+
+		return R.fail("The Token is not the user's own and cannot retrieve non-user's information.");
+
+	}
 
 	/**
 	 * 管理者修改的必填項為 title、firstName、lastName、country、category<br>

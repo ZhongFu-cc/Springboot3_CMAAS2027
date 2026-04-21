@@ -102,11 +102,11 @@ public class MemberController {
 	@Parameters({
 			@Parameter(name = "Authorization-member", description = "請求頭token,token-value開頭必須為Bearer ", required = true, in = ParameterIn.HEADER) })
 	@SaCheckLogin(type = StpKit.MEMBER_TYPE)
-	public R<Member> getMemberForOwner() {
+	public R<MemberVO> getMemberForOwner() {
 		// 根據token 拿取本人的數據
 		Member memberCache = memberService.getMemberInfo();
-		Member member = memberService.getMember(memberCache.getMemberId());
-		return R.ok(member);
+		MemberVO memberVO = memberOrderManager.getMemberVO(memberCache.getMemberId());
+		return R.ok(memberVO);
 	}
 
 	@GetMapping("{id}")
@@ -243,6 +243,7 @@ public class MemberController {
 
 	/**
 	 * 個人修改自身資料
+	 * 
 	 * @param putMemberDTO
 	 * @return
 	 */

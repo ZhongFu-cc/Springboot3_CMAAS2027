@@ -19,6 +19,7 @@ import tw.org.topbs.helper.TagAssignmentHelper;
 import tw.org.topbs.pojo.BO.MemberExcelRaw;
 import tw.org.topbs.pojo.VO.MemberOrderVO;
 import tw.org.topbs.pojo.VO.MemberTagVO;
+import tw.org.topbs.pojo.VO.MemberVO;
 import tw.org.topbs.pojo.entity.Attendees;
 import tw.org.topbs.pojo.entity.Member;
 import tw.org.topbs.pojo.entity.Orders;
@@ -48,6 +49,22 @@ public class MemberOrderManager {
 	private final TagService tagService;
 
 	// --------------------------- 查詢相關 ---------------------------------------
+
+	/**
+	 * 拿到帶有註冊費繳費狀態的VO對象
+	 * @param memberId
+	 * @return
+	 */
+	public MemberVO getMemberVO(Long memberId) {
+
+		Member member = memberService.getMember(memberId);
+		MemberVO vo = memberConvert.entityToVO(member);
+
+		Orders registrationOrder = ordersService.getRegistrationOrderByMemberId(memberId);
+		vo.setStatus(registrationOrder.getStatus());
+		return vo;
+
+	}
 
 	/**
 	 * 獲得訂單狀態的會員人數
@@ -90,14 +107,14 @@ public class MemberOrderManager {
 	 * @param queryText
 	 * @return
 	 */
-	public IPage<MemberTagVO> getUnpaidMemberPage(Page<Member> page,String country, String queryText) {
+	public IPage<MemberTagVO> getUnpaidMemberPage(Page<Member> page, String country, String queryText) {
 
 		// 1.獲取未付款的個人訂單 (外國團體報名不在此限)
 		List<Orders> unpaidRegistrationOrderList = ordersService.getUnpaidRegistrationOrderList();
 
 		// 2.獲取未付款的分頁對象
-		IPage<MemberTagVO> unpaidMemberPage = memberService.getUnpaidMemberPage(page, unpaidRegistrationOrderList,country,
-				queryText);
+		IPage<MemberTagVO> unpaidMemberPage = memberService.getUnpaidMemberPage(page, unpaidRegistrationOrderList,
+				country, queryText);
 		return unpaidMemberPage;
 	}
 

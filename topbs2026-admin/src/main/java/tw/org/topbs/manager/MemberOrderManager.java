@@ -130,11 +130,9 @@ public class MemberOrderManager {
 	public void offlineTransfer(OfflineTransferDTO offlineTransferDTO) {
 		Member member = memberService.getMember(offlineTransferDTO.getMemberId());
 
-		if (StringUtils.isNotBlank(offlineTransferDTO.getRemitAccountLast5())) {
-			// 修改會員卡號末五碼
-			member.setRemitAccountLast5(offlineTransferDTO.getRemitAccountLast5());
-			memberService.updateById(member);
-		}
+		// 修改會員卡號末五碼，不管新舊，理論上就是以這個為準
+		member.setRemitAccountLast5(offlineTransferDTO.getRemitAccountLast5());
+		memberService.updateById(member);
 
 		// 更新訂單狀態 , 改為已付款-確認中
 		ordersService.changeToPending(offlineTransferDTO.getMemberId());

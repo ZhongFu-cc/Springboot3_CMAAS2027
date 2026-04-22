@@ -81,14 +81,6 @@ public interface OrdersService extends IService<Orders> {
 	List<Orders> getUnpaidRegistrationOrderList();
 
 	/**
-	 * For Taiwan本國籍，用戶表示已匯款完成<br>
-	 * 等待管理員確認
-	 * 
-	 * @param memberId
-	 */
-	void changeToPending(Long memberId);
-
-	/**
 	 * For Taiwan本國籍的快速審核繳費狀態 (外國團體報名/訂單不在此限)
 	 * 修改註冊費繳款狀態 為 付款成功
 	 * 

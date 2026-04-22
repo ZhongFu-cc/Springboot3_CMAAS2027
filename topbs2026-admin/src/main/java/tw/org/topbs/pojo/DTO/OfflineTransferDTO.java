@@ -9,8 +9,8 @@ import lombok.Data;
 public class OfflineTransferDTO {
 
 	@NotNull
-	@Schema(description = "會員ID")
-	private Long memberId;
+	@Schema(description = "訂單ID")
+	private Long orderId;
 	
 	@NotBlank
 	@Schema(description = "匯款帳號-後五碼  台灣會員使用")

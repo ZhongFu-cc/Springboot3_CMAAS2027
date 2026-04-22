@@ -152,22 +152,6 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
 		List<Orders> ordersList = baseMapper.selectList(ordersWrapper);
 		return ordersList;
 	}
-
-	@Override
-	public void changeToPending(Long memberId) {
-		// 在訂單表查詢,memberId符合,且ItemSummary 也符合註冊費的訂單
-		LambdaQueryWrapper<Orders> ordersWrapper = new LambdaQueryWrapper<>();
-		ordersWrapper.eq(Orders::getMemberId, memberId)
-				.eq(Orders::getItemsSummary, OrderConstants.ITEMS_SUMMARY_REGISTRATION);
-		Orders orders = baseMapper.selectOne(ordersWrapper);
-
-		// 更新訂單付款狀態為 已付款
-		orders.setStatus(OrderStatusEnum.PENDING_CONFIRMATION.getValue());
-
-		// 更新進資料庫
-		baseMapper.updateById(orders);
-	}
-
 	
 	@Override
 	public void approveUnpaidMember(Long memberId) {

@@ -25,7 +25,9 @@ import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import tw.org.topbs.manager.MemberOrderManager;
 import tw.org.topbs.manager.OrderPaymentManager;
+import tw.org.topbs.pojo.DTO.OfflineTransferDTO;
 import tw.org.topbs.pojo.DTO.addEntityDTO.AddOrdersDTO;
 import tw.org.topbs.pojo.DTO.putEntityDTO.PutOrdersDTO;
 import tw.org.topbs.pojo.entity.Member;
@@ -44,6 +46,7 @@ public class OrdersController {
 
 	private final MemberService memberService;
 	private final OrdersService ordersService;
+	private final MemberOrderManager memberOrderManager;
 	private final OrderPaymentManager orderPaymentManager;
 
 	@GetMapping("owner/{id}")
@@ -152,6 +155,20 @@ public class OrdersController {
 
 	}
 
+	
+	@PutMapping("offline-transfer")
+	@Parameters({
+		@Parameter(name = "Authorization-member", description = "請求頭token,token-value開頭必須為Bearer ", required = true, in = ParameterIn.HEADER) })
+	@Operation(summary = "離線/人工匯款，使用者表示繳費等待管理者確認")
+	@SaCheckLogin(type = StpKit.MEMBER_TYPE)
+	public R<Void> offlineTransfer(@RequestBody @Valid OfflineTransferDTO offlineTransferDTO) {
+		memberOrderManager.offlineTransfer(offlineTransferDTO);
+		return R.ok();
+
+	}
+	
+	
+	
 	@GetMapping("payment")
 	@Operation(summary = "根據訂單編號付款", description = "會得到綠界付款的表單，觸發後會直接開啟一個綠界的付款頁面")
 	public R<String> payment(@RequestParam Long id) {

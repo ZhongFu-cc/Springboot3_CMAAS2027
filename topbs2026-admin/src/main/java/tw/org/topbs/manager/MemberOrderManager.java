@@ -15,6 +15,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import tw.org.topbs.convert.MemberConvert;
+import tw.org.topbs.enums.OrderStatusEnum;
 import tw.org.topbs.enums.TagTypeEnum;
 import tw.org.topbs.helper.TagAssignmentHelper;
 import tw.org.topbs.pojo.BO.MemberExcelRaw;
@@ -128,14 +129,19 @@ public class MemberOrderManager {
 	 * @param offlineTransferDTO
 	 */
 	public void offlineTransfer(OfflineTransferDTO offlineTransferDTO) {
-		Member member = memberService.getMember(offlineTransferDTO.getMemberId());
+
+		Orders order = ordersService.getOrders(offlineTransferDTO.getOrderId());
+		Member member = memberService.getMember(order.getMemberId());
 
 		// 修改會員卡號末五碼，不管新舊，理論上就是以這個為準
 		member.setRemitAccountLast5(offlineTransferDTO.getRemitAccountLast5());
 		memberService.updateById(member);
 
+		// 不管狀態為何,觸發則將訂單狀態改為 付款-待確認
+		order.setStatus(OrderStatusEnum.PENDING_CONFIRMATION.getValue());
+
 		// 更新訂單狀態 , 改為已付款-確認中
-		ordersService.changeToPending(offlineTransferDTO.getMemberId());
+		ordersService.updateById(order);
 
 	}
 

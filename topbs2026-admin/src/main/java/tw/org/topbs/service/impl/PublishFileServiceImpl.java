@@ -45,7 +45,7 @@ public class PublishFileServiceImpl extends ServiceImpl<PublishFileMapper, Publi
 	public List<PublishFile> getFileListByGroupAndType(String group, String type) {
 		LambdaQueryWrapper<PublishFile> fileQueryWrapper = new LambdaQueryWrapper<>();
 		fileQueryWrapper.eq(PublishFile::getGroupType, group)
-				.eq(StringUtils.isNoneBlank(type), PublishFile::getType, type)
+				.eq(StringUtils.isNotBlank(type), PublishFile::getType, type)
 				.orderByAsc(PublishFile::getSort)
 				.orderByDesc(PublishFile::getPublishFileId);
 

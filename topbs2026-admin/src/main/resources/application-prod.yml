@@ -69,15 +69,9 @@ spring:
         # !!! 关键配置 !!!
         # 指向您的 MinIO 服务地址和 API 端口 (默认通常是 9000)
         endpoint: http://localhost:9000
-        bucketName: ${MINIO_BUCKET_NAME}
-
-          # MinIO 强制使用 Path Style 路径，这通常是 S3 兼容服务所需要的
-          # 例如：http://ip:port/bucket-name/object-key
-          #        force-path-style: true
-
-          # 如果您的 MinIO 是 HTTP 协议，或者您不想用 SSL，建议设置：
-          #        custom-http-client-configuration:
-          #          protocol: HTTP1_1
+        bucketName: TOPBS
+        # MinIO 强制使用 Path Style 路径，这通常是 S3 兼容服务所需要的
+        path-style-access-enabled: true
 
 
 mybatis-plus:

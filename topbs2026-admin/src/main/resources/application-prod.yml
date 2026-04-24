@@ -68,7 +68,7 @@ spring:
       s3:
         # !!! 关键配置 !!!
         # 指向您的 MinIO 服务地址和 API 端口 (默认通常是 9000)
-        endpoint: http://192.168.56.1:9000
+        endpoint: http://localhost:9000
         bucketName: ${MINIO_BUCKET_NAME}
 
           # MinIO 强制使用 Path Style 路径，这通常是 S3 兼容服务所需要的

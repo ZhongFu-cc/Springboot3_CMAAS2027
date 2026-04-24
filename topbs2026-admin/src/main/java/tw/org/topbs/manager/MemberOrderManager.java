@@ -5,6 +5,7 @@ import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.excel.EasyExcel;
@@ -14,9 +15,11 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import tw.org.topbs.convert.MemberConvert;
+import tw.org.topbs.enums.OrderStatusEnum;
 import tw.org.topbs.enums.TagTypeEnum;
 import tw.org.topbs.helper.TagAssignmentHelper;
 import tw.org.topbs.pojo.BO.MemberExcelRaw;
+import tw.org.topbs.pojo.DTO.OfflineTransferDTO;
 import tw.org.topbs.pojo.VO.MemberOrderVO;
 import tw.org.topbs.pojo.VO.MemberTagVO;
 import tw.org.topbs.pojo.VO.MemberVO;
@@ -52,6 +55,7 @@ public class MemberOrderManager {
 
 	/**
 	 * 拿到帶有註冊費繳費狀態的VO對象
+	 * 
 	 * @param memberId
 	 * @return
 	 */
@@ -116,6 +120,29 @@ public class MemberOrderManager {
 		IPage<MemberTagVO> unpaidMemberPage = memberService.getUnpaidMemberPage(page, unpaidRegistrationOrderList,
 				country, queryText);
 		return unpaidMemberPage;
+	}
+
+	/**
+	 * 離線/人工 匯款<br>
+	 * 使用者送出確認，等待管理員審核
+	 * 
+	 * @param offlineTransferDTO
+	 */
+	public void offlineTransfer(OfflineTransferDTO offlineTransferDTO) {
+
+		Orders order = ordersService.getOrders(offlineTransferDTO.getOrderId());
+		Member member = memberService.getMember(order.getMemberId());
+
+		// 修改會員卡號末五碼，不管新舊，理論上就是以這個為準
+		member.setRemitAccountLast5(offlineTransferDTO.getRemitAccountLast5());
+		memberService.updateById(member);
+
+		// 不管狀態為何,觸發則將訂單狀態改為 付款-待確認
+		order.setStatus(OrderStatusEnum.PENDING_CONFIRMATION.getValue());
+
+		// 更新訂單狀態 , 改為已付款-確認中
+		ordersService.updateById(order);
+
 	}
 
 	/**

@@ -58,7 +58,7 @@ public class PublishFileController {
 	@GetMapping("{group}")
 	@Operation(summary = "查詢某個組別 及 類別的所有檔案")
 	public R<List<PublishFile>> getPublishFileListByGroup(@PathVariable("group") String group,
-			@RequestParam String type) {
+			@RequestParam(required = false) String type) {
 		List<PublishFile> fileList = publishFileService.getFileListByGroupAndType(group, type);
 		return R.ok(fileList);
 	}

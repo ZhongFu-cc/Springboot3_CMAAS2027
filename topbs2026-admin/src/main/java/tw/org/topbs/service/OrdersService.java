@@ -15,7 +15,7 @@ import tw.org.topbs.pojo.entity.Member;
 import tw.org.topbs.pojo.entity.Orders;
 
 public interface OrdersService extends IService<Orders> {
-	
+
 	/**
 	 * 拿到 註冊費未付款 團體標籤的index
 	 * 
@@ -23,7 +23,7 @@ public interface OrdersService extends IService<Orders> {
 	 * @return
 	 */
 	int getNotPaidRegistrationOrderGroupIndex(int groupSize);
-	
+
 	/**
 	 * 根據繳費狀態,查詢符合的註冊費訂單(註冊費 和 團體註冊費)分頁對象
 	 * 

@@ -27,6 +27,7 @@ public class I18nMessageKey {
 	    // 帳號驗證相關
 	    public static final class Auth {
 	        public static final String EMAIL_NOT_FOUND = "registration.auth.email-not-found";
+	        public static final String ACCOUNT_REGISTERED = "registration.auth.account-registered";
 	        public static final String EMAIL_REGISTERED = "registration.auth.email-registered";
 	        public static final String ID_CARD_REGISTERED = "registration.auth.id_card-registered";
 	        public static final String WRONG_ACCOUNT = "registration.auth.wrong-account";

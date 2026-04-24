@@ -320,7 +320,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 	}
 
 	/**
-	 * 判斷Email 是否被註冊,沒有則新增
+	 * 判斷Email 及 身分證字號 是否被重複註冊,沒有則新增
 	 * 
 	 * @param member
 	 */
@@ -333,7 +333,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
 		if (emailCount > 0) {
 			throw new RegisteredAlreadyExistsException(
-					messageHelper.get(I18nMessageKey.Registration.Auth.EMAIL_REGISTERED));
+					messageHelper.get(I18nMessageKey.Registration.Auth.ACCOUNT_REGISTERED));
 		}
 
 		if (member.getIdCard() != null) {
@@ -344,7 +344,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
 			if (idCardCount > 0) {
 				throw new RegisteredAlreadyExistsException(
-						messageHelper.get(I18nMessageKey.Registration.Auth.ID_CARD_REGISTERED));
+						messageHelper.get(I18nMessageKey.Registration.Auth.ACCOUNT_REGISTERED));
 			}
 		}
 

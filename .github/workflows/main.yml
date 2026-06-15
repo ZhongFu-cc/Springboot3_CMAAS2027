@@ -125,7 +125,7 @@ jobs:
 
 
           echo "新 JAR 已成功上傳（尚未影響任何服務）"
-          nohup java -jar -Dspring.profiles.active=prod  "$APP" > "$LOG" 2>&1 &
+          nohup java -jar -Dspring.profiles.active=prod -Djava.io.tmpdir=/home/user/back-end/temp-excel "$APP" > "$LOG" 2>&1 &
 
 
     

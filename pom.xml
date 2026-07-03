@@ -11,10 +11,10 @@
     </parent>
     <packaging>pom</packaging>
     <groupId>tw.org</groupId>
-    <artifactId>topbs2026</artifactId>
+    <artifactId>cmaas2027</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>topbs2026</name>
-    <description>TOPBS 2026 年會版 </description>
+    <name>cmaas2027</name>
+    <description>CMAAS 2027 年會版 </description>
     <url />
     <licenses>
         <license />
@@ -334,6 +334,6 @@
 
 
     <modules>
-        <module>topbs2026-admin</module>
+        <module>cmaas2027-admin</module>
     </modules>
 </project>

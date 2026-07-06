@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 
 import com.alibaba.excel.annotation.ExcelProperty;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 @Data
@@ -59,6 +60,15 @@ public class MemberExcel {
 	@ExcelProperty("飲食禁忌")
 	private String foodTaboo;
 
+	@ExcelProperty("專業證照號碼(例如醫師證、中醫師證、護理師證)")
+	private String professionalNumber;
+	
+	@ExcelProperty("學會會員編號")
+	private String organizationNumber;
+	
+	@ExcelProperty("以逗號分格儲存,例如:WSA001,WSA002,WSB001,WSB002")
+	private String workshopCodes;
+	
 	@ExcelProperty("群組代號")
 	private String groupCode;
 	

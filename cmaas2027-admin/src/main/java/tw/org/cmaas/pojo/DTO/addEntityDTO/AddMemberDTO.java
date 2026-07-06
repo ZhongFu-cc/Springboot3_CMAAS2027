@@ -1,5 +1,9 @@
 package tw.org.cmaas.pojo.DTO.addEntityDTO;
 
+import java.util.List;
+
+import com.baomidou.mybatisplus.annotation.TableField;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -70,6 +74,15 @@ public class AddMemberDTO {
 
 	@Schema(description = "飲食禁忌")
 	private String foodTaboo;
+	
+	@Schema(description = "專業證照號碼(例如醫師證、中醫師證、護理師證)")
+	private String professionalNumber;
+	
+	@Schema(description = "學會會員編號")
+	private String organizationNumber;
+	
+	@Schema(description = "以逗號分格儲存,例如:WSA001,WSA002,WSB001,WSB002")
+	private List<String> workshopCodes;
 
 	@NotBlank
 	@Schema(description = "驗證碼key")

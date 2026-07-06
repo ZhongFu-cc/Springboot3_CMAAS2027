@@ -39,6 +39,12 @@ public class MemberOrderVO {
 	@Schema(description = "匯款帳號-後五碼  台灣會員使用")
 	private String remitAccountLast5;
 	
+	@Schema(description = "專業證照號碼(例如醫師證、中醫師證、護理師證)")
+	private String professionalNumber;
+	
+	@Schema(description = "學會會員編號")
+	private String organizationNumber;
+	
 	@Schema(description = "會員持有的訂單列表")
 	private List<Orders> ordersList;
 }

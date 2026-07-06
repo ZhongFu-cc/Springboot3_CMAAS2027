@@ -36,7 +36,7 @@ spring:
     driver-class-name: org.mariadb.jdbc.Driver
     # 配置URL,mysql8.0剛出時不配置?serverTimezone=Asia/Taipei,會報啟動錯誤
     # 現在好像解決了
-    url: jdbc:mariadb://localhost:3306/topbs2026_international_conference?rewriteBatchedStatements=true
+    url: jdbc:mariadb://localhost:3306/cmaas2027_international_conference?rewriteBatchedStatements=true
     # 配置連接用戶
     username: ${DB_USER}
     # 配置用戶密碼
@@ -69,7 +69,7 @@ spring:
         # !!! 关键配置 !!!
         # 指向您的 MinIO 服务地址和 API 端口 (默认通常是 9000)
         endpoint: http://localhost:9000
-        bucketName: topbs
+        bucketName: cmaas
         # MinIO 强制使用 Path Style 路径，这通常是 S3 兼容服务所需要的
         path-style-access-enabled: true
 
@@ -81,7 +81,7 @@ mybatis-plus:
 
   # 說明:typeAliases-package: 設定別名掃描包,通常用於掃描單表的實體類,但因繼承BaseMapper這很少用
   # 以這個範例項目為例,他應該是這個包下,預設所有實體類的類名(不區分大小寫)為別名
-  typeAliasesPackage: tw.org.topbs.pojo.entity
+  typeAliasesPackage: tw.org.cmaas.pojo.entity
   # 配置設定
   configuration:
     # 配置輸出日誌-方便查看SQL語句
@@ -166,20 +166,20 @@ springdoc:
     - group: 'all'
       paths-to-match: '/**'
       # 掃描包  tw.org.organ
-      packages-to-scan: tw.org.topbs
+      packages-to-scan: tw.org.cmaas
 
       #  文檔群組名為owner, 表示這個是給Member用戶使用的API
     - group: 'owner'
       paths-to-match: '/*/owner/**'
       # 掃描包  tw.org.organ
-      packages-to-scan: tw.org.topbs
+      packages-to-scan: tw.org.cmaas
 
       #  文檔群組名為admin, 表示這個是給管理者使用的，具有權限的狀態下,拿table Id 可以訪問所有數據
     - group: 'admin'
       # 這邊注意我是使用exclude 對某個路徑進行排除
       paths-to-exclude: '/*/owner/**'
       # 掃描包  tw.org.organ
-      packages-to-scan: tw.org.topbs
+      packages-to-scan: tw.org.cmaas
 
 
 #      #  以下為多個model的Controller層文檔分層,有需要再開啟
@@ -215,15 +215,15 @@ minio:
 # 自定義，專案相關
 project:
   # 專案域名
-  domain: https://tobss.org.tw
+  domain: https://cmaas.org.tw
   # 活動名稱
-  name: TOPBS 2026
+  name: CMAAS 2027
   # 活動名稱縮寫/別名
-  alias: topbs2026
+  alias: cmaas2027
   # 語言，可選值zh_TW / en ，用於選擇中文信zh_TW 或 英文信en
   language: en
   # Banner 圖片
-  banner-url: https://tobss.org.tw/img/banner.jpg
+  banner-url: https://cmaas.org.tw/img/banner.jpg
   # 群組相關，與一次寄送 email 數量有關
   group-size: 200
   # 報名模式，可選值: FREE / PREPAID / POSTPAID ，POSTPAID尚未實現
@@ -233,19 +233,19 @@ project:
   email:
     # 寄件人信箱 (自定義domain 需搭配 spring.mail.* 使用 + brevo STMP ,才有效果)
     # Gmail的話可以直接填進from , 讓寄信和收信的信箱相同
-    from: notify@tobss.org.tw
+    from: notify@cmaas.org.tw
     # 寄件人顯示名稱
-    from-name: TOPBS 2026 Notification
+    from-name: CMAAS 2027 Notification
     # 回覆信箱
-    reply-to: topbs106@gmail.com
+    reply-to: Joanne.Wang@zhongfu-pr.com.tw
     # 付款相關
   payment:
     # 付款後客戶返回的頁面
-    client-back-url: https://tobss.org.tw/member
+    client-back-url: https://cmaas.org.tw/member
     # 付款後，金流系統返回結果的頁面，prod-api 為生產環境的判斷詞墜
-    return-url: https://tobss.org.tw/prod-api/payment
+    return-url: https://cmaas.org.tw/prod-api/payment
     # 廠商訂單編號前墜,最多9碼,超過會被截斷
-    prefix: tobss
+    prefix: cmaas
 
   # 註冊費相關
   # 註冊費美金匯率(Long) , 32為 1美金 : 32台幣 , 不可小於0

@@ -75,6 +75,12 @@ public class CheckinRecordExcel {
 
 	@ExcelProperty("飲食禁忌")
 	private String foodTaboo;
+	
+	@ExcelProperty("專業證照號碼(例如醫師證、中醫師證、護理師證)")
+	private String professionalNumber;
+	
+	@ExcelProperty("學會會員編號")
+	private String organizationNumber;
 
 	@ExcelProperty("群組代號")
 	private String groupCode;

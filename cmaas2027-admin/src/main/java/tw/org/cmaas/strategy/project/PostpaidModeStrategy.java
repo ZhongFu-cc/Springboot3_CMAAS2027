@@ -1,6 +1,9 @@
 package tw.org.cmaas.strategy.project;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -9,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import tw.org.cmaas.config.RegistrationFeeConfig;
 import tw.org.cmaas.enums.MemberCategoryEnum;
 import tw.org.cmaas.enums.RegistrationPhaseEnum;
+import tw.org.cmaas.exception.RegistrationInfoException;
 import tw.org.cmaas.helper.TagAssignmentHelper;
 import tw.org.cmaas.pojo.DTO.EmailBodyContent;
 import tw.org.cmaas.pojo.entity.Member;
@@ -42,6 +46,10 @@ public class PostpaidModeStrategy implements ProjectModeStrategy {
 	private final NotificationService notificationService;
 	private final AsyncService asyncService;
 
+	// 臨時創建Workshop處理
+	private static final Map<String, BigDecimal> WORKSHOP_FEE_MAP = Map.of("WSA001", BigDecimal.valueOf(200), "WSA002",
+			BigDecimal.valueOf(200), "WSB001", BigDecimal.valueOf(200), "WSB002", BigDecimal.valueOf(200));
+
 	@Override
 	public void handleRegistration(Member member) {
 		// 1.拿到配置設定,知道處於哪個註冊階段
@@ -57,12 +65,32 @@ public class PostpaidModeStrategy implements ProjectModeStrategy {
 		BigDecimal membershipFee = registrationFeeConfig.getFee(registrationPhaseEnum.getValue(), country,
 				memberCategoryEnum.getConfigKey());
 
+		// 臨時新增 Workshop的報名費計算
+		// 6. workshop fee 加總
+		BigDecimal workshopFee = BigDecimal.ZERO;
+		String workshopCodes = member.getWorkshopCodes();
+
+		List<String> workshopList = (workshopCodes == null || workshopCodes.isBlank()) ? List.of()
+				: Arrays.stream(workshopCodes.split(",")).map(String::trim).filter(s -> !s.isEmpty()).toList();
+
+		for (String ws : workshopList) {
+			BigDecimal fee = WORKSHOP_FEE_MAP.get(ws);
+			if (fee != null) {
+				workshopFee = workshopFee.add(fee);
+			} else {
+				throw new RegistrationInfoException("不合規的workshop資訊");
+			}
+		}
+
+		// 7. final fee (註冊費 + 工作坊報名)
+		BigDecimal totalFee = membershipFee.add(workshopFee);
+
 		// 5.如果註冊費金額為0 , 創建免費註冊費訂單 , 會自動為繳費完畢的情況
-		if (membershipFee.compareTo(BigDecimal.ZERO) == 0) {
+		if (totalFee.compareTo(BigDecimal.ZERO) == 0) {
 			ordersService.createFreeRegistrationOrder(member);
 		} else {
 			// 創建付費註冊費訂單
-			ordersService.createRegistrationOrder(membershipFee, member);
+			ordersService.createRegistrationOrder(totalFee, member);
 			// 獲取當下「未付款」的Member群體的Index，賦予「未繳費」標籤
 			tagAssignmentHelper.assignTag(member.getMemberId(), ordersService::getNotPaidRegistrationOrderGroupIndex,
 					tagService::getOrCreateNotPaidGroupTag, memberTagService::addMemberTag);

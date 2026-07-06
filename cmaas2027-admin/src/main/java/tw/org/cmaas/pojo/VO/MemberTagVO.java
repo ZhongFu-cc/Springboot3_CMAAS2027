@@ -67,6 +67,12 @@ public class MemberTagVO {
 	@Schema(description = "會員資格的身份補充")
 	private String categoryExtra;
 	
+	@Schema(description = "專業證照號碼(例如醫師證、中醫師證、護理師證)")
+	private String professionalNumber;
+	
+	@Schema(description = "學會會員編號")
+	private String organizationNumber;
+	
 	@Schema(description = "備註")
 	private String remark;
 

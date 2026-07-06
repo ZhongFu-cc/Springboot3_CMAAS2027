@@ -1,6 +1,7 @@
 package tw.org.cmaas.convert;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -23,6 +24,7 @@ import tw.org.cmaas.pojo.excelPojo.MemberExcel;
 @Mapper(componentModel = "spring")
 public interface MemberConvert {
 
+	@Mapping(source = "workshopCodes", target = "workshopCodes", qualifiedByName = "convertListToString")
 	Member addDTOToEntity(AddMemberDTO addMemberDTO);
 
 	Member addGroupDTOToEntity(AddGroupMemberDTO addGroupMemberDTO);
@@ -30,7 +32,7 @@ public interface MemberConvert {
 	Member forAdminAddDTOToEntity(AddMemberForAdminDTO addMemberForAdminDTO);
 
 	Member putDTOToEntity(PutMemberDTO putMemberDTO);
-	
+
 	Member putForAdminDTOToEntity(PutMemberForAdminDTO putMemberForAdminDTO);
 
 	MemberVO entityToVO(Member member);
@@ -57,6 +59,19 @@ public interface MemberConvert {
 	@Named("convertCategory")
 	default String convertCategory(Integer category) {
 		return MemberCategoryEnum.fromValue(category).getLabelZh();
+	}
+
+	@Named("convertListToString")
+	default String convertListToString(List<String> value) {
+
+		if (value == null || value.isEmpty()) {
+			return null;
+		}
+
+		return value.stream()
+				.filter(v -> v != null && !v.trim().isEmpty())
+				.map(String::trim)
+				.collect(Collectors.joining(","));
 	}
 
 }

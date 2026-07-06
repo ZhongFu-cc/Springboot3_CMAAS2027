@@ -108,6 +108,19 @@ public class Member implements Serializable {
 	@Schema(description = "會員資格的身份補充")
 	@TableField("category_extra")
 	private String categoryExtra;
+	
+	@Schema(description = "專業證照號碼(例如醫師證、中醫師證、護理師證)")
+	@TableField("professional_number")
+	private String professionalNumber;
+	
+	@Schema(description = "學會會員編號")
+	@TableField("organization_number")
+	private String organizationNumber;
+	
+	@Schema(description = "以逗號分格儲存,例如:WSA001,WSA002,WSB001,WSB002")
+	@TableField("workshop_codes")
+	private String workshopCodes;
+	
 
 	@Schema(description = "備註")
 	@TableField("remark")

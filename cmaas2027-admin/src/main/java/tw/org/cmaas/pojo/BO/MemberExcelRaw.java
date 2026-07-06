@@ -3,6 +3,8 @@ package tw.org.cmaas.pojo.BO;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.baomidou.mybatisplus.annotation.TableField;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -57,6 +59,15 @@ public class MemberExcelRaw {
 
 	@Schema(description = "飲食禁忌")
 	private String foodTaboo;
+	
+	@Schema(description = "專業證照號碼(例如醫師證、中醫師證、護理師證)")
+	private String professionalNumber;
+	
+	@Schema(description = "學會會員編號")
+	private String organizationNumber;
+	
+	@Schema(description = "以逗號分格儲存,例如:WSA001,WSA002,WSB001,WSB002")
+	private String workshopCodes;
 
 	@Schema(description = "群組代號, 用UUID randomUUID() 產生")
 	private String groupCode;

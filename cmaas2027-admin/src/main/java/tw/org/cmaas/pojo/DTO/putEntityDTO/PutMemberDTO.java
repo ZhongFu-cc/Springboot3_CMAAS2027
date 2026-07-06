@@ -1,5 +1,7 @@
 package tw.org.cmaas.pojo.DTO.putEntityDTO;
 
+import com.baomidou.mybatisplus.annotation.TableField;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -58,6 +60,12 @@ public class PutMemberDTO {
 
 	@Schema(description = "飲食禁忌")
 	private String foodTaboo;
+	
+	@Schema(description = "專業證照號碼(例如醫師證、中醫師證、護理師證)")
+	private String professionalNumber;
+	
+	@Schema(description = "學會會員編號")
+	private String organizationNumber;
 
 	@Schema(description = "備註")
 	private String remark;

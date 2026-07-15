@@ -73,6 +73,15 @@
             <tr th:if="${!#strings.isEmpty(category)}">
                 <td><strong>身分類別：</strong> <span th:text="${category}"></span></td>
             </tr>
+            <tr th:if="${!#strings.isEmpty(professionalNumber)}">
+                <td><strong>中醫師證號：</strong> <span th:text="${professionalNumber}"></span></td>
+            </tr>            
+            <tr th:if="${!#strings.isEmpty(organizationNumber)}">
+                <td><strong>會員編號：</strong> <span th:text="${organizationNumber}"></span></td>
+            </tr>
+            <tr th:if="${!#strings.isEmpty(workshopCodes)}">
+                <td><strong>報名場次：</strong> <span th:text="${workshopCodes}"></span></td>
+            </tr>
 
             <tr th:if="${mode == 'prepaid'}">
                 <td>
@@ -80,11 +89,13 @@
                 </td>
             </tr>
 
+            <!-- 
             <tr th:if="${mode == 'postpaid'}">
                 <td>
                     您現在可以繼續提交您的論文。然而，請注意，您的提交將被審核，但如果未支付註冊費用，則不符合發表資格。
                 </td>
             </tr>
+            -->
 
             <tr>
                 <td><strong>這是一封自動化電子郵件。請勿直接回覆此訊息。</strong></td>

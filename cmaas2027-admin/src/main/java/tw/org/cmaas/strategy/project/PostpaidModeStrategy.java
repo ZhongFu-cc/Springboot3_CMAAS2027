@@ -47,8 +47,9 @@ public class PostpaidModeStrategy implements ProjectModeStrategy {
 	private final AsyncService asyncService;
 
 	// 臨時創建Workshop處理
-	private static final Map<String, BigDecimal> WORKSHOP_FEE_MAP = Map.of("WSA001", BigDecimal.valueOf(200), "WSA002",
-			BigDecimal.valueOf(200), "WSB001", BigDecimal.valueOf(200), "WSB002", BigDecimal.valueOf(200));
+	private static final Map<String, BigDecimal> WORKSHOP_FEE_MAP = Map.of("WSA001", BigDecimal.valueOf(5000), "WSA002",
+			BigDecimal.valueOf(5000), "WSB001", BigDecimal.valueOf(5000), "WSB002", BigDecimal.valueOf(5000), "MAIN",
+			BigDecimal.valueOf(1500));
 
 	@Override
 	public void handleRegistration(Member member) {

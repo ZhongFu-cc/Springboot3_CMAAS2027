@@ -3,6 +3,9 @@ package tw.org.cmaas.service.impl;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -58,6 +61,13 @@ public class NotificationServiceImpl implements NotificationService {
 	private static final String FIELD_JOB_TITLE = "jobTitle";
 	private static final String FIELD_PHONE = "phone";
 	private static final String FIELD_CATEGORY = "category";
+	private static final String FIELD_PROFESSIONAL_NUMBER = "professionalNumber";
+	private static final String FIELD_ORGANIZATION_NUMBER = "organizationNumber";
+	private static final String FIELD_WORKSHOP_CODES = "workshopCodes";
+
+	// 臨時創建Workshop處理
+	private static final Map<String, String> WORKSHOP_NAME_MAP = Map.of("WSA001", "1/22 早上A場", "WSA002", "1/22 下午A場",
+			"WSB001", "1/22 早上B場", "WSB002", "1/22 下午B場", "MAIN", "1/23 主會議");
 
 	@Override
 	public EmailBodyContent generateRegistrationSuccessContent(Member member, String bannerPhotoUrl) {
@@ -81,6 +91,24 @@ public class NotificationServiceImpl implements NotificationService {
 		context.setVariable(FIELD_PHONE, member.getPhone());
 		// Category 要轉換成字串
 		context.setVariable(FIELD_CATEGORY, MemberCategoryEnum.fromValue(member.getCategory()).getLabelEn());
+		// 專業證號、學會編號、Workshop場次
+		context.setVariable(FIELD_PROFESSIONAL_NUMBER, member.getProfessionalNumber());
+		context.setVariable(FIELD_ORGANIZATION_NUMBER, member.getOrganizationNumber());
+
+		// === [新增] Workshop Codes 轉換邏輯 ===
+		// 假設 member.getWorkshopCodes() 格式為 "WSA001,WSA002,MAIN"
+		String rawCodes = member.getWorkshopCodes();
+		String friendlyWorkshopNames = "";
+
+		if (rawCodes != null && !rawCodes.trim().isEmpty()) {
+			friendlyWorkshopNames = Arrays.stream(rawCodes.split(",")) // 依照逗號拆分
+					.map(String::trim) // 去除前後空白
+					.map(code -> WORKSHOP_NAME_MAP.getOrDefault(code, code)) // 轉換為中文名稱，若找不到則保留原 Code
+					.collect(Collectors.joining("、")); // 用「、」連接
+		}
+
+		// 將轉換後的一般人易懂名稱（例如: "1/22 早上A場、1/22 下午A場、1/23 主會議"）設定到模板變量中
+		context.setVariable(FIELD_WORKSHOP_CODES, friendlyWorkshopNames);
 
 		// 3. 根據 project.language 選擇模板路徑（無需 if-else 太多，簡單拼接）
 		String languagePath = "";

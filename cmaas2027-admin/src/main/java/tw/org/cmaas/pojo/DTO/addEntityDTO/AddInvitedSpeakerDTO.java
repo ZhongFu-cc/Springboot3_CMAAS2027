@@ -16,6 +16,9 @@ public class AddInvitedSpeakerDTO {
 
 	@Schema(description = "講者現任職的單位")
 	private String affiliation;
+	
+	@Schema(description = "講者的職稱")
+	private String jobTitle;
 
 	@Schema(description = "教育背景/學歷，用Json array處理")
 	private List<String> educationalBackground;

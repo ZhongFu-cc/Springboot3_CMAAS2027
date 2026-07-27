@@ -53,6 +53,10 @@ public class InvitedSpeaker implements Serializable {
 	@Schema(description = "講者現任職的單位")
 	@TableField("affiliation")
 	private String affiliation;
+	
+	@Schema(description = "講者的職稱")
+	@TableField("job_title")
+	private String jobTitle;
 
 	@Schema(description = "speaker 照片 URL")
 	@TableField("photo_url")

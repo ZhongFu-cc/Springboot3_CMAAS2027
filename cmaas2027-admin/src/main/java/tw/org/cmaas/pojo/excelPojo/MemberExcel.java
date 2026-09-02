@@ -69,6 +69,13 @@ public class MemberExcel {
 	@ExcelProperty("以逗號分格儲存,例如:WSA001,WSA002,WSB001,WSB002")
 	private String workshopCodes;
 	
+	@ExcelProperty("是否繳交常年會費")
+	private String membershipDuesStatus;
+
+	// Entity中為Integer , Excel 為String
+	@ExcelProperty("是否申請中醫師教育學分")
+	private String applyForCME;
+
 	@ExcelProperty("群組代號")
 	private String groupCode;
 	

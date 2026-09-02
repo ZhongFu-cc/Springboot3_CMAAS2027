@@ -47,7 +47,7 @@ public class AddMemberDTO {
 	private String remitAccountLast5;
 
 	@NotNull
-	@Schema(description = "用於分類會員資格, 1為 Member，2為 Others，3為 Non-Member，4為 MVP，5為 Speaker，6為 Moderator，7為 Staff")
+	@Schema(description = "用於分類會員資格, 1為 Member，2為 Permanent-Member，3為 Non-Member，4為 MVP，5為 Speaker，6為 Moderator，7為 Staff")
 	private Integer category;
 
 	@Schema(description = "會員資格的身份補充")
@@ -83,6 +83,13 @@ public class AddMemberDTO {
 	
 	@Schema(description = "以逗號分格儲存,例如:WSA001,WSA002,WSB001,WSB002")
 	private List<String> workshopCodes;
+
+	@Schema(description = "是否繳交常年會費(選填), 可選值:「本次報名繳交」、「已繳交116年會費」")
+	private String membershipDuesStatus;
+
+	@NotNull
+	@Schema(description = "是否申請中醫師教育學分, 1為申請, 0為不申請")
+	private Integer applyForCME;
 
 	@NotBlank
 	@Schema(description = "驗證碼key")

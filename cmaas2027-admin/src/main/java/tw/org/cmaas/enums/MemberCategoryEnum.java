@@ -11,7 +11,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum MemberCategoryEnum {
 	MEMBER(1,"member", "Member", "Member(會員)"),
-	OTHERS(2,"others", "Others", "Others(非會員)"),
+	PERMANENT_MEMBER(2,"permanent-member", "Permanent Member", "永久會員"),
 	NON_MEMBER(3,"non-member", "Non-Member", "Non-Member(非會員醫師)"),
 	MVP(4,"mvp", "MVP", "MVP"),
 	SPEAKER(5,"speaker", "Speaker", "講者"),

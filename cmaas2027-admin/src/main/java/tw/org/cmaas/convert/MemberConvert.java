@@ -49,6 +49,7 @@ public interface MemberConvert {
 	// BO對象轉成真正的Excel 對象
 	@Mapping(target = "status", source = "status", qualifiedByName = "convertStatus")
 	@Mapping(target = "category", source = "category", qualifiedByName = "convertCategory")
+	@Mapping(target = "applyForCME", source = "applyForCME", qualifiedByName = "convertApplyForCME")
 	MemberExcel memberExcelRawToExcel(MemberExcelRaw memberExcelRaw);
 
 	@Named("convertStatus")
@@ -59,6 +60,11 @@ public interface MemberConvert {
 	@Named("convertCategory")
 	default String convertCategory(Integer category) {
 		return MemberCategoryEnum.fromValue(category).getLabelZh();
+	}
+
+	@Named("convertApplyForCME")
+	default String convertApplyForCME(Integer applyForCME) {
+		return Integer.valueOf(1).equals(applyForCME) ? "是" : "否";
 	}
 
 	@Named("convertListToString")

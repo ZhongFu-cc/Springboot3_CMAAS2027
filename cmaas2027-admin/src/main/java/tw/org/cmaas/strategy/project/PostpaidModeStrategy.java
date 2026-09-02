@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
 import tw.org.cmaas.config.RegistrationFeeConfig;
 import tw.org.cmaas.enums.MemberCategoryEnum;
+import tw.org.cmaas.enums.MembershipDuesEnum;
 import tw.org.cmaas.enums.RegistrationPhaseEnum;
 import tw.org.cmaas.exception.RegistrationInfoException;
 import tw.org.cmaas.helper.TagAssignmentHelper;
@@ -48,33 +49,52 @@ public class PostpaidModeStrategy implements ProjectModeStrategy {
 
 	// 臨時創建Workshop處理
 	private static final Map<String, BigDecimal> WORKSHOP_FEE_MAP = Map.of("WSA001", BigDecimal.valueOf(5000), "WSA002",
-			BigDecimal.valueOf(5000), "WSB001", BigDecimal.valueOf(5000), "WSB002", BigDecimal.valueOf(5000), "MAIN",
-			BigDecimal.valueOf(1500));
+			BigDecimal.valueOf(5000), "WSB001", BigDecimal.valueOf(5000), "WSB002", BigDecimal.valueOf(5000));
+
+	// 主會議的workshop代號
+	private static final String MAIN_CONFERENCE_CODE = "MAIN";
+
+	// 常年會費，不分會員身份都是同一個價錢
+	private static final BigDecimal ANNUAL_DUES_FEE = BigDecimal.valueOf(1000);
+
+	// 申請中醫師教育學分的費用
+	private static final BigDecimal CME_FEE = BigDecimal.valueOf(800);
 
 	@Override
 	public void handleRegistration(Member member) {
 		// 1.拿到配置設定,知道處於哪個註冊階段
 		RegistrationPhaseEnum registrationPhaseEnum = settingService.getRegistrationPhaseEnum();
 
-		// 2.透過Country 拿到國籍 , 只分國內國外,	
+		// 2.透過Country 拿到國籍 , 只分國內國外,
 		String country = CountryUtil.getTaiwanOrForeign(member.getCountry());
 
 		// 3.拿到身分
 		MemberCategoryEnum memberCategoryEnum = MemberCategoryEnum.fromValue(member.getCategory());
 
-		// 4.透過階段、國籍、身分，得到金額
-		BigDecimal membershipFee = registrationFeeConfig.getFee(registrationPhaseEnum.getValue(), country,
-				memberCategoryEnum.getConfigKey());
-
-		// 臨時新增 Workshop的報名費計算
-		// 6. workshop fee 加總
-		BigDecimal workshopFee = BigDecimal.ZERO;
+		// 4.解析報名的場次,主會議也放在workshopCodes內
 		String workshopCodes = member.getWorkshopCodes();
 
 		List<String> workshopList = (workshopCodes == null || workshopCodes.isBlank()) ? List.of()
 				: Arrays.stream(workshopCodes.split(",")).map(String::trim).filter(s -> !s.isEmpty()).toList();
 
+		boolean joinMainConference = workshopList.contains(MAIN_CONFERENCE_CODE);
+
+		// 5.主會議報名費,透過階段、國籍、身分,從 project.registration-fee 得到金額,有參加主會議才收
+		BigDecimal mainConferenceFee = joinMainConference
+				? registrationFeeConfig.getFee(registrationPhaseEnum.getValue(), country,
+						memberCategoryEnum.getConfigKey())
+				: BigDecimal.ZERO;
+
+		// 臨時新增 Workshop的報名費計算
+		// 6. workshop fee 加總,主會議的金額不從這裡算
+		BigDecimal workshopFee = BigDecimal.ZERO;
+
 		for (String ws : workshopList) {
+
+			if (MAIN_CONFERENCE_CODE.equals(ws)) {
+				continue;
+			}
+
 			BigDecimal fee = WORKSHOP_FEE_MAP.get(ws);
 			if (fee != null) {
 				workshopFee = workshopFee.add(fee);
@@ -83,8 +103,43 @@ public class PostpaidModeStrategy implements ProjectModeStrategy {
 			}
 		}
 
-		// 7. final fee (註冊費 + 工作坊報名)
-		BigDecimal totalFee = membershipFee.add(workshopFee);
+		// 6-1. 常年會費，選填，只有選擇「繳交常年會費$1000元」的人才需要於這次報名一併收取
+		BigDecimal annualDuesFee = BigDecimal.ZERO;
+		String membershipDuesStatus = member.getMembershipDuesStatus();
+
+		if (membershipDuesStatus != null && !membershipDuesStatus.isBlank()) {
+
+			MembershipDuesEnum membershipDuesEnum;
+			try {
+				membershipDuesEnum = MembershipDuesEnum.fromValue(membershipDuesStatus);
+			} catch (IllegalArgumentException e) {
+				throw new RegistrationInfoException("不合規的常年會費繳交資訊");
+			}
+
+			if (MembershipDuesEnum.PAY_ON_REGISTRATION == membershipDuesEnum) {
+				annualDuesFee = ANNUAL_DUES_FEE;
+			}
+		}
+
+		// 6-2. 中醫師教育學分，只有參加主會議才能申請，且必須填寫中醫師證號
+		BigDecimal cmeFee = BigDecimal.ZERO;
+
+		if (Integer.valueOf(1).equals(member.getApplyForCME())) {
+
+			if (!joinMainConference) {
+				throw new RegistrationInfoException("未參加主會議, 無法申請中醫師教育學分");
+			}
+
+			String professionalNumber = member.getProfessionalNumber();
+			if (professionalNumber == null || professionalNumber.isBlank()) {
+				throw new RegistrationInfoException("申請中醫師教育學分時, 必須填寫中醫師證號");
+			}
+
+			cmeFee = CME_FEE;
+		}
+
+		// 7. final fee (主會議報名費 + 工作坊報名 + 常年會費 + 中醫師教育學分)
+		BigDecimal totalFee = mainConferenceFee.add(workshopFee).add(annualDuesFee).add(cmeFee);
 
 		// 5.如果註冊費金額為0 , 創建免費註冊費訂單 , 會自動為繳費完畢的情況
 		if (totalFee.compareTo(BigDecimal.ZERO) == 0) {

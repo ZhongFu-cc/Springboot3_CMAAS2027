@@ -57,7 +57,7 @@ public class MemberVO {
 	@Schema(description = "飲食禁忌")
 	private String foodTaboo;
 
-	@Schema(description = "用於分類會員資格, 1為 Member，2為 Others，3為 Non-Member，4為 MVP，5為 Speaker，6為 Moderator，7為 Staff")
+	@Schema(description = "用於分類會員資格, 1為 Member，2為 Permanent-Member，3為 Non-Member，4為 MVP，5為 Speaker，6為 Moderator，7為 Staff")
 	private Integer category;
 
 	@Schema(description = "會員資格的身份補充")
@@ -68,6 +68,12 @@ public class MemberVO {
 	
 	@Schema(description = "學會會員編號")
 	private String organizationNumber;
+
+	@Schema(description = "是否繳交常年會費(選填), 可選值:「本次報名繳交」、「已繳交116年會費」")
+	private String membershipDuesStatus;
+
+	@Schema(description = "是否申請中醫師教育學分, 1為申請, 0為不申請")
+	private Integer applyForCME;
 
 	@Schema(description = "訂單狀態 0為未付款 ; 1為已付款-待審核 ; 2為付款成功 ; 3為付款失敗")
 	private Integer status;

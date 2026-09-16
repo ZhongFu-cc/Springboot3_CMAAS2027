@@ -16,7 +16,7 @@ public final class WorkshopConstants {
 	public static final String MAIN_CONFERENCE_CODE = "MAIN";
 
 	/** workshop代號 對應 顯示名稱 */
-	public static final Map<String, String> WORKSHOP_NAME_MAP = Map.of("WSA001", "1/22 早上A場", "WSA002", "1/22 下午A場",
-			"WSB001", "1/22 早上B場", "WSB002", "1/22 下午B場", MAIN_CONFERENCE_CODE, "1/23 主會議");
+	public static final Map<String, String> WORKSHOP_NAME_MAP = Map.of("WSA001", "1/23 早上A場", "WSA002", "1/23 下午A場",
+			"WSB001", "1/23 早上B場", "WSB002", "1/23 下午B場", MAIN_CONFERENCE_CODE, "1/24 主會議");
 
 }

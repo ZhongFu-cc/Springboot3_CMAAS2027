@@ -49,6 +49,7 @@ import tw.org.cmaas.pojo.DTO.MemberEmailLogin;
 import tw.org.cmaas.pojo.DTO.MemberIdCardLogin;
 import tw.org.cmaas.pojo.DTO.MemberLoginDTO;
 import tw.org.cmaas.pojo.DTO.PutMemberIdDTO;
+import tw.org.cmaas.pojo.DTO.RegistrationFeePreviewDTO;
 import tw.org.cmaas.pojo.DTO.addEntityDTO.AddMemberDTO;
 import tw.org.cmaas.pojo.DTO.addEntityDTO.AddTagToMemberDTO;
 import tw.org.cmaas.pojo.DTO.putEntityDTO.PutMemberDTO;
@@ -56,6 +57,7 @@ import tw.org.cmaas.pojo.DTO.putEntityDTO.PutMemberForAdminDTO;
 import tw.org.cmaas.pojo.VO.MemberOrderVO;
 import tw.org.cmaas.pojo.VO.MemberTagVO;
 import tw.org.cmaas.pojo.VO.MemberVO;
+import tw.org.cmaas.pojo.VO.RegistrationFeeVO;
 import tw.org.cmaas.pojo.entity.Member;
 import tw.org.cmaas.pojo.entity.Orders;
 import tw.org.cmaas.saToken.StpKit;
@@ -186,6 +188,15 @@ public class MemberController {
 		IPage<MemberTagVO> unpaidMemberPage = memberOrderManager.getUnpaidMemberPage(pageable, country, queryText);
 
 		return R.ok(unpaidMemberPage);
+	}
+
+	@PostMapping("fee-preview")
+	@Operation(summary = "註冊前的費用預覽，回傳費用明細與總額，不會新增會員或產生訂單")
+	public R<RegistrationFeeVO> previewRegistrationFee(
+			@RequestBody @Valid RegistrationFeePreviewDTO registrationFeePreviewDTO) {
+		RegistrationFeeVO registrationFeeVO = memberRegistrationManager
+				.previewRegistrationFee(registrationFeePreviewDTO);
+		return R.ok(registrationFeeVO);
 	}
 
 	@PostMapping

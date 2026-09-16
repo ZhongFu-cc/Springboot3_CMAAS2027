@@ -18,11 +18,15 @@ import tw.org.cmaas.enums.MemberCategoryEnum;
 import tw.org.cmaas.enums.RegistrationPhaseEnum;
 import tw.org.cmaas.exception.RegistrationClosedException;
 import tw.org.cmaas.helper.MessageHelper;
+import tw.org.cmaas.helper.RegistrationFeeCalculator;
 import tw.org.cmaas.helper.TagAssignmentHelper;
+import tw.org.cmaas.pojo.BO.RegistrationFeeBO;
 import tw.org.cmaas.pojo.DTO.AddGroupMemberDTO;
 import tw.org.cmaas.pojo.DTO.AddMemberForAdminDTO;
 import tw.org.cmaas.pojo.DTO.GroupRegistrationDTO;
+import tw.org.cmaas.pojo.DTO.RegistrationFeePreviewDTO;
 import tw.org.cmaas.pojo.DTO.addEntityDTO.AddMemberDTO;
+import tw.org.cmaas.pojo.VO.RegistrationFeeVO;
 import tw.org.cmaas.pojo.entity.Attendees;
 import tw.org.cmaas.pojo.entity.Member;
 import tw.org.cmaas.service.AttendeesService;
@@ -51,6 +55,7 @@ public class MemberRegistrationManager {
 
 
 	private final RegistrationFeeConfig registrationFeeConfig;
+	private final RegistrationFeeCalculator registrationFeeCalculator;
 
 	private final ProjectModeContext projectModeContext;
 
@@ -66,8 +71,36 @@ public class MemberRegistrationManager {
 	private final InvitedSpeakerService invitedSpeakerService;
 
 	/**
+	 * 註冊前的費用預覽,不新增會員、不產生訂單<br>
+	 * 計算規則與正式註冊完全相同 (共用 RegistrationFeeCalculator)
+	 *
+	 * @param registrationFeePreviewDTO
+	 * @return
+	 */
+	public RegistrationFeeVO previewRegistrationFee(RegistrationFeePreviewDTO registrationFeePreviewDTO) {
+
+		// 1.先判斷是否處於註冊時間內,與正式註冊一致
+		if (!settingService.isRegistrationOpen()) {
+			throw new RegistrationClosedException(messageHelper.get(I18nMessageKey.Registration.CLOSED));
+		}
+
+		// 2.轉成費用計算條件
+		RegistrationFeeBO registrationFeeBO = RegistrationFeeBO.builder()
+				.country(registrationFeePreviewDTO.getCountry())
+				.category(registrationFeePreviewDTO.getCategory())
+				.workshopCodes(registrationFeePreviewDTO.getWorkshopCodes())
+				.membershipDuesStatus(registrationFeePreviewDTO.getMembershipDuesStatus())
+				.applyForCME(registrationFeePreviewDTO.getApplyForCME())
+				.professionalNumber(registrationFeePreviewDTO.getProfessionalNumber())
+				.build();
+
+		// 3.計算費用明細及總額
+		return registrationFeeCalculator.calculate(registrationFeeBO);
+	}
+
+	/**
 	 * 註冊功能,新增會員,產生「付費」訂單
-	 * 
+	 *
 	 * @param addMemberDTO
 	 * @return
 	 */

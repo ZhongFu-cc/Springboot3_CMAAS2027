@@ -101,7 +101,7 @@ public class Member implements Serializable {
 	@TableField("food_taboo")
 	private String foodTaboo;
 
-	@Schema(description = "用於分類會員資格, 1為 Member，2為 Others，3為 Non-Member，4為 MVP，5為 Speaker，6為 Moderator，7為 Staff")
+	@Schema(description = "用於分類會員資格, 1為 Member，2為 Permanent-Member，3為 Non-Member，4為 MVP，5為 Speaker，6為 Moderator，7為 Staff")
 	@TableField("category")
 	private Integer category;
 
@@ -121,6 +121,14 @@ public class Member implements Serializable {
 	@TableField("workshop_codes")
 	private String workshopCodes;
 	
+
+	@Schema(description = "是否繳交常年會費(選填), 可選值:「本次報名繳交」、「已繳交116年會費」")
+	@TableField("membership_dues_status")
+	private String membershipDuesStatus;
+
+	@Schema(description = "是否申請中醫師教育學分, 1為申請, 0為不申請")
+	@TableField("apply_for_cme")
+	private Integer applyForCME;
 
 	@Schema(description = "備註")
 	@TableField("remark")

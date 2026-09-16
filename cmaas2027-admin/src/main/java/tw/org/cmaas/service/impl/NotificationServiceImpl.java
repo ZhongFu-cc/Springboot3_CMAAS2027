@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -13,6 +12,7 @@ import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import lombok.RequiredArgsConstructor;
+import tw.org.cmaas.constants.WorkshopConstants;
 import tw.org.cmaas.enums.MemberCategoryEnum;
 import tw.org.cmaas.enums.ProjectModeEnum;
 import tw.org.cmaas.pojo.DTO.EmailBodyContent;
@@ -65,10 +65,6 @@ public class NotificationServiceImpl implements NotificationService {
 	private static final String FIELD_ORGANIZATION_NUMBER = "organizationNumber";
 	private static final String FIELD_WORKSHOP_CODES = "workshopCodes";
 
-	// 臨時創建Workshop處理
-	private static final Map<String, String> WORKSHOP_NAME_MAP = Map.of("WSA001", "1/22 早上A場", "WSA002", "1/22 下午A場",
-			"WSB001", "1/22 早上B場", "WSB002", "1/22 下午B場", "MAIN", "1/23 主會議");
-
 	@Override
 	public EmailBodyContent generateRegistrationSuccessContent(Member member, String bannerPhotoUrl) {
 		Context context = new Context();
@@ -103,11 +99,11 @@ public class NotificationServiceImpl implements NotificationService {
 		if (rawCodes != null && !rawCodes.trim().isEmpty()) {
 			friendlyWorkshopNames = Arrays.stream(rawCodes.split(",")) // 依照逗號拆分
 					.map(String::trim) // 去除前後空白
-					.map(code -> WORKSHOP_NAME_MAP.getOrDefault(code, code)) // 轉換為中文名稱，若找不到則保留原 Code
+					.map(code -> WorkshopConstants.WORKSHOP_NAME_MAP.getOrDefault(code, code)) // 轉換為中文名稱，若找不到則保留原 Code
 					.collect(Collectors.joining("、")); // 用「、」連接
 		}
 
-		// 將轉換後的一般人易懂名稱（例如: "1/22 早上A場、1/22 下午A場、1/23 主會議"）設定到模板變量中
+		// 將轉換後的一般人易懂名稱（例如: "1/23 早上A場、1/23 下午A場、1/24 主會議"）設定到模板變量中
 		context.setVariable(FIELD_WORKSHOP_CODES, friendlyWorkshopNames);
 
 		// 3. 根據 project.language 選擇模板路徑（無需 if-else 太多，簡單拼接）

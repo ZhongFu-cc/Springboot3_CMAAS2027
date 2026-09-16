@@ -43,7 +43,7 @@ public class AddGroupMemberDTO {
 	private String remitAccountLast5;
 
 	@NotNull
-	@Schema(description = "用於分類會員資格, 1為 Member，2為 Others，3為 Non-Member，4為 MVP，5為 Speaker，6為 Moderator，7為 Staff")
+	@Schema(description = "用於分類會員資格, 1為 Member，2為 Permanent-Member，3為 Non-Member，4為 MVP，5為 Speaker，6為 Moderator，7為 Staff")
 	private Integer category;
 	
 	@Schema(description = "會員資格的身份補充")

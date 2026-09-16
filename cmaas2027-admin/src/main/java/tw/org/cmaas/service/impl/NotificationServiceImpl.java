@@ -103,7 +103,7 @@ public class NotificationServiceImpl implements NotificationService {
 					.collect(Collectors.joining("、")); // 用「、」連接
 		}
 
-		// 將轉換後的一般人易懂名稱（例如: "1/22 早上A場、1/22 下午A場、1/23 主會議"）設定到模板變量中
+		// 將轉換後的一般人易懂名稱（例如: "1/23 早上A場、1/23 下午A場、1/24 主會議"）設定到模板變量中
 		context.setVariable(FIELD_WORKSHOP_CODES, friendlyWorkshopNames);
 
 		// 3. 根據 project.language 選擇模板路徑（無需 if-else 太多，簡單拼接）
